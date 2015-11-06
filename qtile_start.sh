@@ -1,10 +1,10 @@
 #! /bin/bash
-eval $(cat ~/.fehbg)
 
 #urxvtd -q -f -o &
 #xcompmgr
 nm-applet &
-(sleep 500 && dropboxd &)
+eval $(cat ~/.fehbg)
+(sleep 500 && dropbox &)
 #blueman-applet &
 volumeicon &
 xscreensaver -no-splash &
