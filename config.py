@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from libqtile.config import Screen, Drag, Click
-from libqtile.config import Key, Group
+from libqtile.config import Key, Group, Match, Rule
 from libqtile.command import lazy
 from libqtile import layout, bar, widget, hook
+from libqtile.dgroups import simple_key_binder
 
 from widgets import *
 import os
@@ -335,22 +336,49 @@ mouse = [
 
 # Next, we specify group names, and use the group name list to generate an appropriate
 # set of bindings for group switching.
-groups = []
-for index, name in enumerate(["personal", "chat", "dev", "work", "media", "misc"], 1):
-    groups.append(Group(name))
-    shortcut = "F%s" % index
-    keys.append(
-        Key([mod], shortcut, lazy.group[name].toscreen())
-    )
-    keys.append(
-        Key([mod, "mod1"], shortcut, lazy.window.togroup(name))
-    )
+groups = [
+    Group('main', position=1),
+    Group('dev', exclusive=True,
+          matches=[Match(wm_class=['Terminator', 'Emacs'])],
+          position=2),
+    Group('work', position=3),
+    Group('misc', position=4),
+    Group('chat', persist=False, init=False,
+          matches=[Match(wm_class=['Pidgin', 'Telegram', 'Discord', 'TeamSpeak 3'])],),
+    Group('gaming', persist=True, init=False,
+          matches=[Match(wm_class=['LoLPatcherUx.exe', 'LoLClient.exe', 'Wine', 'Steam'])],),
+    Group("media", persist=False, init=False,
+          matches=[Match(wm_class=["Vlc", "Banshee", "xbmc.bin", 'Amarok',
+                                   'Clementine', 'nuvolaplayer'])]
+          ),
+]
+
+# dgroup rules that not belongs to any group
+dgroups_app_rules = [
+    # Everything i want to be float, but don't want to change group
+    Rule(Match(title=['nested', 'gscreenshot'],
+               wm_class=['Plugin-container', 'Gnome-commander', 'Nautilus', 'Krusader',
+                         re.compile('Gnome-keyring-prompt.*?')],
+               ),
+         float=True, intrusive=True),
+
+    # floating windows
+    Rule(Match(wm_class=['Steam'],
+               title=[re.compile('[a-zA-Z]*? Steam'),
+                      re.compile('Steam - [a-zA-Z]*?')]
+               ),
+         float=True, group='gaming'),
+    Rule(Match(wm_class=['LoLPatcherUx.exe', 'LoLClient.exe']), float=True),
+    ]
+
+# auto bind keys to dgroups mod+1 to 9
+dgroups_key_binder = simple_key_binder(mod)
 
 layouts = [
     layout.Max(),  # Fullscreen all the things
     layout.Matrix(),  # Tile evenly in squares
     layout.MonadTall(),  # 1 tall pane, 2 small ones
-    layout.Floating(),
+    layout.Floating(border_focus="#555555"),
 ]
 
 
@@ -366,8 +394,6 @@ def dialogs(window):
 def app_by_conf(window):
     wm_class = window.window.get_wm_class()
     conf = get_conf(wm_class)
-    if 'group' in conf:
-        window.togroup(conf['group'])
     if 'extra_args'in conf:
         for arg, val in conf['extra_args'].items():
             setattr(window, arg, val)
