@@ -19,6 +19,7 @@ widget_defaults = {
     'font': "Envy Code R",
     'fontsize': 12,
     'background': '#000000',
+    'foreground': '#BBBBBB'
 }
 
 
@@ -125,6 +126,12 @@ APP_MAP = {
 }
 
 
+floating_layout = layout.floating.Floating(
+    border_focus='#555555',
+    border_normal='#000000',
+)
+
+
 def get_conf(app_spec):
     if isinstance(app_spec, tuple):
         return APP_MAP.get(app_spec, {})
@@ -193,18 +200,20 @@ screens = [
 
             # A prompt for spawning processes or switching groups. This will be
             # invisible most of the time.
-            widget.Prompt(foreground="#6A75FF", **widget_defaults),
+            widget.Prompt(foreground="#6A75FF", font=widget_defaults['font'], fontsize=widget_defaults['fontsize'],
+                          background=widget_defaults['background']),
 
             # Current window name.
-            widget.WindowName(font="Titillium", fontsize=13),
+            widget.WindowName(font="Fira", fontsize=12),
 
-            widget.Notify(foreground="#D7aa00", **widget_defaults),
+            widget.Notify(foreground="#D7aa00", font=widget_defaults['font'], fontsize=widget_defaults['fontsize'],
+                          background=widget_defaults['background']),
             # WcxWlan(**widget_defaults),
-            widget.NetGraph(width=42, interface="wlan0", bandwidth_type="down",
-                            graph_color="#D7FF00", fill_color="#D7DD00", border_color='#111111'),
-            widget.NetGraph(width=42, interface="wlan0", bandwidth_type="up",
-                            graph_color="#D7aa00", fill_color="#D7aa00", border_color='#111111'),
-            widget.Sep(),
+            # widget.NetGraph(width=42, interface="wlan0", bandwidth_type="down",
+            #                 graph_color="#DDDDDD", fill_color="#EEEEEE", border_color='#111111'),
+            # widget.NetGraph(width=42, interface="wlan0", bandwidth_type="up",
+            #                 graph_color="#AAAAAA", fill_color="#888888", border_color='#111111'),
+            # widget.Sep(),
             widget.BatteryIcon(theme_path=os.path.join(RESOURCE_PATH, 'battery-icons')),
             WcxBatteryWidget(
                 battery_name='BAT0',
@@ -215,34 +224,36 @@ screens = [
                 charge_char='↑',
                 discharge_char='↓',
                 padding=4,
+                font=widget_defaults['font'], fontsize=widget_defaults['fontsize'], background=widget_defaults['background'],
                 format='{char} {percent:2.0%} ({hour:d}:{min:02d})',
                 update_interval=5,
-                **widget_defaults
             ),
             widget.Sep(),
             widget.Systray(background=widget_defaults['background']),
             widget.Sep(),
-            widget.Clock('%a %d %b', **widget_defaults),
-            widget.Clock('%I:%M', foreground="#D7FF00", **widget_defaults),
-        ], 20, background=widget_defaults['background'], opacity=1),
-        bottom=bar.Bar([HostInfo(separator_color='#D7DD00', **widget_defaults),
+            widget.Clock(format='%a %d %b', **widget_defaults),
+            widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
+                         fontsize=widget_defaults['fontsize'],
+                         background=widget_defaults['background']),
+        ], 20, background=widget_defaults['background'], opacity=0.92),
+        bottom=bar.Bar([HostInfo(separator_color='#777777', **widget_defaults),
                         widget.Sep(),
                         # widget.CPUGraph(width=80, line_width=2, border_color='#111111',
-                        #                 graph_color='#D7FF00', fill_color='#D7DD00'),
+                        #                 graph_color='#DDDDDD', fill_color='#D7DD00'),
                         # widget.MemoryGraph(width=80, line_width=2, border_color='#111111',
-                        #                    graph_color='#D7FF00', fill_color='#D7DD00'),
-                        Metrics(cpu_label_foreground="#D7FF00", download_foreground="#D7DD00",
-                                mem_label_foreground="#D7FF00", upload_foreground="#D7aa00",
-                                net_label_foreground="#D7FF00",
+                        #                    graph_color='#DDDDDD', fill_color='#D7DD00'),
+                        Metrics(cpu_label_foreground="#DDDDDD", download_foreground="#DDDDDD",
+                                mem_label_foreground="#DDDDDD", upload_foreground="#AAAAAA",
+                                net_label_foreground="#DDDDDD",
                                 **widget_defaults),
                         widget.Spacer(width=bar.STRETCH),
-                        EmacsTask(label_color="#D7FF00", **widget_defaults),
+                        EmacsTask(label_color="#DDDDDD", **widget_defaults),
                         # WCXGcalWidget(www_group='personal', storage_file='/home/warchiefx/.config/qtile/gcal.settings',
                         #              update_interval=900, calendar='primary',
                         #             reminder_color="#D7aa00",
                         #             **widget_defaults),
                         #AmarokWidget(**widget_defaults),
-                        ], 20, background=widget_defaults['background'], opacity=1))
+                        ], 20, background=widget_defaults['background'], opacity=0.92))
 ]
 
 mod = "mod4"
