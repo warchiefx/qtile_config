@@ -264,8 +264,8 @@ keys = [
     Key(["control", "mod4"], "q",  lazy.shutdown()),
     Key(["control", "mod4"], "r",  lazy.restart()),
 
-    Key(["control", "mod1"], "Left", lazy.screen.prevgroup()),
-    Key(["control", "mod1"], "Right", lazy.screen.nextgroup()),
+    Key([mod], "Left", lazy.screen.prevgroup()),
+    Key([mod], "Right", lazy.screen.nextgroup()),
 
     Key([mod], "k",              lazy.layout.down()),
     Key([mod], "j",              lazy.layout.up()),
@@ -284,8 +284,11 @@ keys = [
     Key([mod], "x",              lazy.window.kill()),
     Key([mod], "c",              lazy.window.close()),
 
+    Key([], 'XF86KbdBrightnessUp',  lazy.spawn("xbacklight -inc 10")),
+    Key([], 'XF86KbdBrightnessDown',  lazy.spawn("xbacklight -dec 10")),
+
     # interact with prompts
-    Key(["mod1"], "F2",              lazy.spawn('dmenu_run -p "Run? >" -fn "Envy Code R-10" -sb "#D7FF00" -sf "#000000" -nb "#000000"')),
+    Key(["mod1"], "F2",              lazy.spawn('dmenu_run -p "Run? >" -fn "Envy Code R-10" -sb "#DDDDDD" -sf "#000000" -nb "#000000"')),
     Key([mod], "g",              lazy.switchgroup()),
 
     Key([mod, 'mod1'], "j",
@@ -300,7 +303,7 @@ keys = [
 
 
     # start specific apps
-    Key([mod], "w",              lazy.spawn("opera")),
+    Key([mod], "w",              lazy.spawn("chromium")),
     Key([mod, "shift"], "w",     lazy.spawn("firefox")),
     Key([mod], "Return",         lazy.spawn("terminator")),
     Key([mod], "a",              lazy.function(spawn_app_or_group("nuvolaplayer"))),
