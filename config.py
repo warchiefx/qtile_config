@@ -45,6 +45,18 @@ APP_MAP = {
             'floating': True,
         },
     },
+    ("LoLPatcherUx.exe", "Wine"): {
+        'group': 'gaming',
+        'extra_args': {
+            'floating': True,
+        }
+    },
+    ("LolClient.exe", "Wine"): {
+        'group': 'gaming',
+        'extra_args': {
+            'floating': True,
+        }
+    },
     ('clementine', 'Clementine'): {
         'group': 'media',
         'cmd': 'clementine',
