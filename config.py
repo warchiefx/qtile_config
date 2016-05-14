@@ -4,11 +4,12 @@ from libqtile.config import Key, Group, Match, Rule
 from libqtile.command import lazy
 from libqtile import layout, bar, widget, hook
 from libqtile.dgroups import simple_key_binder
+from subprocess import check_output
 
 from widgets import *
 import os
 import re
-import subprocess
+import commands
 
 # The screens variable contains information about what bars are drawn where on
 # each screen. If you have multiple screens, you'll need to construct multiple
@@ -21,6 +22,12 @@ widget_defaults = {
     'fontsize': 12,
     'background': '#000000',
     'foreground': '#BBBBBB'
+}
+
+sep_defaults = {
+    'size_percent': 60,
+    'foreground': '#777777',
+    'padding': 5,
 }
 
 
@@ -45,6 +52,12 @@ APP_MAP = {
         'cmd': 'nautilus',
         'extra_args': {
             'floating': True,
+       },
+    },
+    ('variety', 'Variety'): {
+        'cmd': 'variety',
+        'extra_args': {
+            'floating': True,
         },
     },
     ("LoLPatcherUx.exe", "Wine"): {
@@ -67,6 +80,31 @@ APP_MAP = {
         'group': 'media',
         'cmd': 'amarok',
     },
+    ('spotify', 'Spotify'): {
+        'group': 'media',
+        'cmd': 'spotify',
+    },
+    ("nylas n1", "Nylas N1"): {
+        'group': 'mail',
+        'cmd': 'nylas',
+        'extra_args': {
+            'floating': True
+        }
+    },
+    ("evolution", "Evolution"): {
+        'group': 'mail',
+        'cmd': 'evolution',
+        'extra_args': {
+            'floating': True
+        }
+    },
+    ('slack', 'Slack'): {
+        'group': 'slack',
+        'cmd': 'slack',
+        'extra_args': {
+            'floating': True
+        }
+    },
     ('nuvolaplayer', 'nuvolaplayer'): {
         'group': 'media',
         'cmd': 'nuvolaplayer',
@@ -79,9 +117,30 @@ APP_MAP = {
         'group': 'media',
         'cmd': 'xbmc',
     },
-    ('pidgin', 'Pidgin'): {
+    ('Pidgin', 'Pidgin'): {
         'group': 'chat',
         'cmd': 'pidgin',
+        'extra_args': {
+            'floating': True
+        }
+    },
+    ('Telegram', 'Telegram'): {
+        'group': 'chat',
+        'cmd': 'telegram',
+        'extra_args': {
+            'floating': True
+        }
+    },
+    ('franz', 'Franz'): {
+        'group': 'chat',
+        'cmd': 'franz',
+        'extra_args': {
+            'floating': True
+        }
+    },
+    ('cutegram', 'Cutegram'): {
+        'group': 'chat',
+        'cmd': 'cutegram',
         'extra_args': {
             'floating': True
         }
@@ -116,10 +175,6 @@ APP_MAP = {
     #     'group': 'twitter',
     #     'cmd': 'hotot-gtk3',
     # },
-    ("Telegram", "Telegram"): {
-        'group': 'chat',
-        'cmd': 'telegram'
-    },
     ('transmission-gtk', 'Transmission-gtk'): {
         'group': 'misc',
         'cmd': 'transmission-gtk',
@@ -185,7 +240,7 @@ def modify_opacity(incr=0.1):
     return f
 
 
-screens = [
+DUAL_SCREEN_CONFIG = [
     Screen(
         top=bar.Bar([
             # This is a list of our virtual desktops.
@@ -197,7 +252,7 @@ screens = [
                             padding=1,
                             this_current_screen_border="#A6E22A", background=widget_defaults['background'],
                             urgent_border="#BB1100",),
-            widget.Sep(),
+            widget.Sep(**sep_defaults),
 
             # A prompt for spawning processes or switching groups. This will be
             # invisible most of the time.
@@ -214,7 +269,7 @@ screens = [
             #                 graph_color="#DDDDDD", fill_color="#EEEEEE", border_color='#111111'),
             # widget.NetGraph(width=42, interface="wlan0", bandwidth_type="up",
             #                 graph_color="#AAAAAA", fill_color="#888888", border_color='#111111'),
-            # widget.Sep(),
+            # widget.Sep(**sep_defaults),
             widget.BatteryIcon(theme_path=os.path.join(RESOURCE_PATH, 'battery-icons')),
             WcxBatteryWidget(
                 battery_name='BAT0',
@@ -229,16 +284,16 @@ screens = [
                 format='{char} {percent:2.0%} ({hour:d}:{min:02d})',
                 update_interval=5,
             ),
-            widget.Sep(),
+            # widget.Sep(**sep_defaults),
             widget.Systray(background=widget_defaults['background']),
-            widget.Sep(),
+            # widget.Sep(**sep_defaults),
             widget.Clock(format='%a %d %b', **widget_defaults),
             widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
                          fontsize=widget_defaults['fontsize'],
                          background=widget_defaults['background']),
-        ], 20, background=widget_defaults['background'], opacity=0.92),
+        ], 20, background=widget_defaults['background'], opacity=1),
         bottom=bar.Bar([HostInfo(separator_color='#777777', **widget_defaults),
-                        widget.Sep(),
+                        widget.Sep(**sep_defaults),
                         # widget.CPUGraph(width=80, line_width=2, border_color='#111111',
                         #                 graph_color='#DDDDDD', fill_color='#D7DD00'),
                         # widget.MemoryGraph(width=80, line_width=2, border_color='#111111',
@@ -254,8 +309,131 @@ screens = [
                         #             reminder_color="#D7aa00",
                         #             **widget_defaults),
                         #AmarokWidget(**widget_defaults),
-                        ], 20, background=widget_defaults['background'], opacity=0.92))
+                        ], 20, background=widget_defaults['background'], opacity=1)),
+    Screen(top=bar.Bar([widget.GroupBox(urgent_alert_method='text', font=widget_defaults['font'],
+                                        fontsize=widget_defaults['fontsize'],
+                                        # margin_y = 1,
+                                        # margin_x = 1,
+                                        borderwidth=1,
+                                        padding=1,
+                                        this_current_screen_border="#A6E22A", background=widget_defaults['background'],
+                                        urgent_border="#BB1100",),
+                        widget.Sep(**sep_defaults),
+                        # widget.WindowTabs(),
+                        # Current window name.
+                        widget.WindowName(font="Fira", fontsize=12),
+                        #widget.Sep(**sep_defaults),
+                        widget.Clock(format='%a %d %b', **widget_defaults),
+                        widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
+                                     fontsize=widget_defaults['fontsize'],
+                                     background=widget_defaults['background']),
+    ], 20, background=widget_defaults['background'], opacity=1),
+           bottom=bar.Bar([
+               HostInfo(separator_color='#777777', **widget_defaults),
+               widget.Sep(**sep_defaults),
+               # widget.CPUGraph(width=80, line_width=2, border_color='#111111',
+               #                 graph_color='#DDDDDD', fill_color='#D7DD00'),
+               # widget.MemoryGraph(width=80, line_width=2, border_color='#111111',
+               #                    graph_color='#DDDDDD', fill_color='#D7DD00'),
+               Metrics(cpu_label_foreground="#DDDDDD", download_foreground="#DDDDDD",
+                       mem_label_foreground="#DDDDDD", upload_foreground="#AAAAAA",
+                       net_label_foreground="#DDDDDD",
+                       **widget_defaults),
+               widget.Spacer(width=bar.STRETCH),
+               EmacsTask(label_color="#DDDDDD", **widget_defaults),
+           ], 20, background=widget_defaults['background'], opacity=1))
 ]
+
+SINGLE_SCREEN_CONFIG = [
+    Screen(
+        top=bar.Bar([
+            # This is a list of our virtual desktops.
+            widget.GroupBox(urgent_alert_method='text', font=widget_defaults['font'],
+                            fontsize=widget_defaults['fontsize'],
+                            # margin_y = 1,
+                            # margin_x = 1,
+                            borderwidth=1,
+                            padding=1,
+                            this_current_screen_border="#A6E22A", background=widget_defaults['background'],
+                            urgent_border="#BB1100",),
+            widget.Sep(**sep_defaults),
+
+            # A prompt for spawning processes or switching groups. This will be
+            # invisible most of the time.
+            widget.Prompt(foreground="#6A75FF", font=widget_defaults['font'], fontsize=widget_defaults['fontsize'],
+                          background=widget_defaults['background']),
+
+
+            # widget.TaskList(**widget_defaults),
+            # Current window name.
+            widget.WindowName(font="Fira", fontsize=12),
+
+            widget.Notify(foreground="#D7aa00", font=widget_defaults['font'], fontsize=widget_defaults['fontsize'],
+                          background=widget_defaults['background']),
+            # WcxWlan(**widget_defaults),
+            # widget.NetGraph(width=42, interface="wlan0", bandwidth_type="down",
+            #                 graph_color="#DDDDDD", fill_color="#EEEEEE", border_color='#111111'),
+            # widget.NetGraph(width=42, interface="wlan0", bandwidth_type="up",
+            #                 graph_color="#AAAAAA", fill_color="#888888", border_color='#111111'),
+            # widget.Sep(**sep_defaults),
+            widget.BatteryIcon(theme_path=os.path.join(RESOURCE_PATH, 'battery-icons')),
+            WcxBatteryWidget(
+                battery_name='BAT0',
+                energy_now_file='charge_now',
+                energy_full_file='charge_full',
+                power_now_file='current_now',
+                foreground="#A1A1A1",
+                charge_char='↑',
+                discharge_char='↓',
+                padding=4,
+                font=widget_defaults['font'], fontsize=widget_defaults['fontsize'], background=widget_defaults['background'],
+                format='{char} {percent:2.0%} ({hour:d}:{min:02d})',
+                update_interval=5,
+            ),
+            widget.Sep(**sep_defaults),
+            widget.Systray(background=widget_defaults['background']),
+            widget.Sep(**sep_defaults),
+            widget.Clock(format='%a %d %b', **widget_defaults),
+            widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
+                         fontsize=widget_defaults['fontsize'],
+                         background=widget_defaults['background']),
+        ], 20, background=widget_defaults['background'], opacity=1),
+        bottom=bar.Bar([HostInfo(separator_color='#777777', **widget_defaults),
+                        widget.Sep(**sep_defaults),
+                        # widget.CPUGraph(width=80, line_width=2, border_color='#111111',
+                        #                 graph_color='#DDDDDD', fill_color='#D7DD00'),
+                        # widget.MemoryGraph(width=80, line_width=2, border_color='#111111',
+                        #                    graph_color='#DDDDDD', fill_color='#D7DD00'),
+                        Metrics(cpu_label_foreground="#DDDDDD", download_foreground="#DDDDDD",
+                                mem_label_foreground="#DDDDDD", upload_foreground="#AAAAAA",
+                                net_label_foreground="#DDDDDD",
+                                **widget_defaults),
+                        widget.Spacer(width=bar.STRETCH),
+                        EmacsTask(label_color="#DDDDDD", **widget_defaults),
+                        # WCXGcalWidget(www_group='personal', storage_file='/home/warchiefx/.config/qtile/gcal.settings',
+                        #              update_interval=900, calendar='primary',
+                        #             reminder_color="#D7aa00",
+                        #             **widget_defaults),
+                        #AmarokWidget(**widget_defaults),
+                        ], 20, background=widget_defaults['background'], opacity=1)),
+]
+
+
+SCREEN_CONFIGS = {
+    1: SINGLE_SCREEN_CONFIG,
+    2: DUAL_SCREEN_CONFIG,
+}
+
+
+def get_number_of_screens():
+    status, out = commands.getstatusoutput('xrandr | grep "\\bconnected\\b" | wc -l')
+    if status == 0:
+        return int(out)
+    return 1
+
+num_screens = get_number_of_screens()
+
+screens = SCREEN_CONFIGS.get(num_screens, SINGLE_SCREEN_CONFIG)
 
 mod = "mod4"
 # mod1 = Alt
@@ -285,6 +463,11 @@ keys = [
     Key([mod], "x",              lazy.window.kill()),
     Key([mod], "c",              lazy.window.close()),
 
+    Key([mod], "x",              lazy.window.kill()),
+
+    Key([mod], "F7",              lazy.spawn('/home/warchiefx/.scripts/enable_monitor')),
+    Key([mod, 'shift'], "F7",              lazy.spawn('/home/warchiefx/.scripts/disable_monitor')),
+
     Key([], 'XF86KbdBrightnessUp',  lazy.spawn("xbacklight -inc 10")),
     Key([], 'XF86KbdBrightnessDown',  lazy.spawn("xbacklight -dec 10")),
 
@@ -304,16 +487,18 @@ keys = [
 
 
     # start specific apps
-    Key([mod], "w",              lazy.spawn("chromium")),
+    Key([mod], "w",              lazy.spawn("google-chrome-stable")),
     Key([mod, "shift"], "w",     lazy.spawn("firefox")),
+    Key([mod], "m",              lazy.spawn("nylas")),
+    Key([mod], "s",              lazy.spawn("slack")),
     Key([mod], "Return",         lazy.spawn("terminator")),
-    Key([mod], "a",              lazy.function(spawn_app_or_group("nuvolaplayer"))),
+    Key([mod], "a",              lazy.function(spawn_app_or_group("spotify"))),
     Key([mod, "shift"], "a",     lazy.spawn("pavucontrol")),
     Key([mod], "v",              lazy.function(spawn_app_or_group('vlc'))),
     Key([mod, 'shift'], "v",     lazy.function(spawn_app_or_group("xbmc"))),
     # Key([mod], "s",              lazy.function(spawn_app_or_group("skype"))),
     Key([mod], "d",              lazy.spawn("lxappearance")),
-    Key([mod], "p",              lazy.function(spawn_app_or_group("telegram"))),
+    Key([mod], "p",              lazy.function(spawn_app_or_group("franz"))),
     Key([mod], "b",              lazy.function(spawn_app_or_group("transmission-gtk"))),
     Key([mod], "t",              lazy.function(spawn_app_or_group("hotot-gtk3"))),
     Key([mod], "f",              lazy.spawn("gnome-commander")),
@@ -338,17 +523,19 @@ mouse = [
 # set of bindings for group switching.
 groups = [
     Group('main', position=1),
-    Group('dev', exclusive=True,
+    Group('chat', persist=True, position=2,
+          matches=[Match(wm_class=['Pidgin', 'Cutegram', 'Discord', 'TeamSpeak 3', 'Telegram', 'Franz'])],),
+    Group('mail', position=3, exclusive=False,
+          matches=[Match(wm_class=['Nylas N1', 'Evolution'])],
+          init=True, persist=True,),
+    Group('dev', exclusive=False,
           matches=[Match(wm_class=['Terminator', 'Emacs'])],
-          position=2),
-    Group('work', position=3),
-    Group('misc', position=4),
-    Group('chat', persist=False, init=False,
-          matches=[Match(wm_class=['Pidgin', 'Telegram', 'Discord', 'TeamSpeak 3'])],),
+          position=4),
+    Group('work', position=5),
     Group('gaming', persist=True, init=False,
           matches=[Match(wm_class=['LoLPatcherUx.exe', 'LoLClient.exe', 'Wine', 'Steam'])],),
-    Group("media", persist=False, init=False,
-          matches=[Match(wm_class=["Vlc", "Banshee", "xbmc.bin", 'Amarok',
+    Group("media", persist=True, init=False,
+          matches=[Match(wm_class=["Vlc", "Banshee", "xbmc.bin", 'Amarok', 'spotify', 'Spotify'
                                    'Clementine', 'nuvolaplayer'])]
           ),
 ]
@@ -369,6 +556,7 @@ dgroups_app_rules = [
                ),
          float=True, group='gaming'),
     Rule(Match(wm_class=['LoLPatcherUx.exe', 'LoLClient.exe']), float=True),
+    Rule(Match(wm_class=['spotify', 'Spotify']), group='media'),
     ]
 
 # auto bind keys to dgroups mod+1 to 9
@@ -402,3 +590,8 @@ def app_by_conf(window):
 @hook.subscribe.startup
 def startup():
     execute_once('compton --backend glx -b')
+
+
+@hook.subscribe.screen_change
+def restart_on_randr(qtile, ev):
+    qtile.cmd_restart()

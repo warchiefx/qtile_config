@@ -296,7 +296,12 @@ class Metrics(ThreadedPollText):
         try:
             for chip in sensors.iter_detected_chips():
                 for feature in chip:
-                    results[chip.prefix][feature.label] = feature.get_value()
+                    if chip.prefix.startswith('nouveau'):
+                        continue
+                    try:
+                        results[chip.prefix][feature.label] = feature.get_value()
+                    except Exception as e:
+                        raise e
         finally:
             sensors.cleanup()
         return results
@@ -306,7 +311,7 @@ class Metrics(ThreadedPollText):
             sensors_output = self.read_sensors()
         template = '<span weight="bold" color="{cpu_label_foreground}">Fan:</span> {fan_speed:.1f} RPM'
         return template.format(cpu_label_foreground=self.cpu_label_foreground,
-                               fan_speed=sensors_output.get('thinkpad', {}).get('fan1', '-1'))
+                               fan_speed=sensors_output.get('thinkpad', {}).get('fan1', -1))
 
     def format_cpu_temp(self, sensors_output=None):
         if not sensors_output:
@@ -315,7 +320,7 @@ class Metrics(ThreadedPollText):
         # core_temps = {label: value for label, value in sensors_output.get('coretemp',
         #                                                                   {}).items() if label.startswith('Core')}
         return template.format(cpu_label_foreground=self.cpu_label_foreground,
-                               avg_temp=sensors_output.get('coretemp', {}).get('Physical id 0'))
+                               avg_temp=sensors_output.get('coretemp', {}).get('Physical id 0', 0))
                                # avg_temp=sum(val for val in core_temps.values()) / len(core_temps))
 
     def get_net_usage(self):
