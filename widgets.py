@@ -196,7 +196,7 @@ class EmacsTask(ThreadedPollText):
     def poll(self):
         text = ''
         try:
-            line = subprocess.check_output(['emacsclient', '-e', '(wcx/org-get-clocked-time)'])
+            line = subprocess.check_output(['emacsclient', '-e', '(wcx/org-get-clocked-time)']).decode('utf-8')
             line = line.replace('"', '')
             line = line.replace('\n', '')
             if line != 'nil':
@@ -290,20 +290,25 @@ class Metrics(ThreadedPollText):
 
     @cache.cache_on_arguments()
     def read_sensors(self):
-        import sensors
+        # TODO: Find another sensor library, this one breaks qtile
         results = defaultdict(dict)
-        sensors.init()
-        try:
-            for chip in sensors.iter_detected_chips():
-                for feature in chip:
-                    if chip.prefix.startswith('nouveau'):
-                        continue
-                    try:
-                        results[chip.prefix][feature.label] = feature.get_value()
-                    except Exception as e:
-                        raise e
-        finally:
-            sensors.cleanup()
+        # sensors.init()
+
+        # for chip in sensors.ChipIterator():
+        #     chip_name = chip.prefix.decode('utf-8')
+        #     if chip_name.startswith('nouveau'):
+        #         continue
+        #     for feature in sensors.FeatureIterator(chip):
+        #         sfs = list(sensors.SubFeatureIterator(chip, feature))
+        #         label = sensors.get_label(chip, feature).encode('utf-8')
+        #         vals = [sensors.get_value(chip, sf.number) for sf in sfs]
+        #         skipname = len(feature.name) + 1  # skip common prefix
+        #         names = [sf.name[skipname:].encode("utf-8") for sf in sfs]
+        #         data = dict(zip(names, vals))
+        #         results[chip_name][label] = data.get('input')
+
+        # sensors.cleanup()
+
         return results
 
     def format_fan_speed(self, sensors_output=None):
@@ -365,16 +370,14 @@ class Metrics(ThreadedPollText):
 
     def poll(self):
         text = ""
-        try:
-            sensors_output = self.read_sensors()
-            stat = [self.get_cpu_usage(), self.format_cpu_temp(sensors_output), self.format_fan_speed(sensors_output),
-                    self.get_mem_usage(), self.get_load_avg()]
-            net = self.get_net_usage()
-            if net:
-                stat.append(net)
-            text = ('<span color="%s"> | </span>' % (self.separator_color)).join(stat)
-        except Exception as e:
-            text = e.message
+        stat = []
+        # sensors_output = self.read_sensors()
+        stat = [self.get_cpu_usage(),  # self.format_cpu_temp(sensors_output), self.format_fan_speed(sensors_output),
+                self.get_mem_usage(), self.get_load_avg()]
+        # net = self.get_net_usage()
+        # if net:
+        #     stat.append(net)
+        text = ('<span color="%s"> | </span>' % (self.separator_color)).join(stat)
 
         return text
 
@@ -407,128 +410,128 @@ class HostInfo(ThreadedPollText):
         return text
 
 
-#from apiclient.discovery import build
-from oauth2client.client import AccessTokenRefreshError
-from oauth2client.client import OAuth2WebServerFlow
-from oauth2client.tools import run
-import oauth2client.file
-import httplib2
-import datetime
-import re
-import dateutil.parser
-from libqtile import utils
+# #from apiclient.discovery import build
+# from oauth2client.client import AccessTokenRefreshError
+# from oauth2client.client import OAuth2WebServerFlow
+# from oauth2client.tools import run
+# import oauth2client.file
+# import httplib2
+# import datetime
+# import re
+# import dateutil.parser
+# from libqtile import utils
 
 
-def istoday(date):
-    today = datetime.datetime.now()
-    return all([getattr(date, attr) == getattr(today, attr) for attr in ['year', 'month', 'day']])
+# def istoday(date):
+#     today = datetime.datetime.now()
+#     return all([getattr(date, attr) == getattr(today, attr) for attr in ['year', 'month', 'day']])
 
 
-class WCXGcalWidget(object):
-    def __init__(self, **config):
-        super(WCXGcalWidget, self).__init__(**config)
-        # Run once, at start
-        self.cal_updater()
+# class WCXGcalWidget(object):
+#     def __init__(self, **config):
+#         super(WCXGcalWidget, self).__init__(**config)
+#         # Run once, at start
+#         self.cal_updater()
 
-    def update(self, data):
-        if data:
-            info = data.get('next_event', {})
-            date = info.get('date')
-            if date:
-                if istoday(info['date']):
-                    info['date'] = date.strftime('%I:%M%p')
-                else:
-                    info['date'] = date.strftime('%a %d %b %I:%M%p')
-            else:
-                info['date'] = '...'
-            template = '<span weight="bold" color="#D7FF00">Next Event:</span>' + \
-                       '<span> <span color="#bbbbbb">{date}</span><span color="#444444">' + \
-                       '/</span>{description}</span>'
-            self.text = template.format(**info)
-        else:
-            self.text = 'No calendar data available'
-        self.bar.draw()
-        return False
+#     def update(self, data):
+#         if data:
+#             info = data.get('next_event', {})
+#             date = info.get('date')
+#             if date:
+#                 if istoday(info['date']):
+#                     info['date'] = date.strftime('%I:%M%p')
+#                 else:
+#                     info['date'] = date.strftime('%a %d %b %I:%M%p')
+#             else:
+#                 info['date'] = '...'
+#             template = '<span weight="bold" color="#D7FF00">Next Event:</span>' + \
+#                        '<span> <span color="#bbbbbb">{date}</span><span color="#444444">' + \
+#                        '/</span>{description}</span>'
+#             self.text = template.format(**info)
+#         else:
+#             self.text = 'No calendar data available'
+#         self.bar.draw()
+#         return False
 
-    def button_press(self, x, y, button):
-        super(WCXGcalWidget, self).button_press(x, y, button)
+#     def button_press(self, x, y, button):
+#         super(WCXGcalWidget, self).button_press(x, y, button)
 
-    def fetch_calendar(self):
-        # if we don't have valid credentials, update them
-        if not hasattr(self, 'credentials') or self.credentials.invalid:
-            self.cred_init()
-            data = {'next_event': {'description': 'Credentials updating'}}
-            return data
+#     def fetch_calendar(self):
+#         # if we don't have valid credentials, update them
+#         if not hasattr(self, 'credentials') or self.credentials.invalid:
+#             self.cred_init()
+#             data = {'next_event': {'description': 'Credentials updating'}}
+#             return data
 
-        # Create an httplib2.Http object to handle our HTTP requests and
-        # authorize it with our credentials from self.cred_init
-        http = httplib2.Http()
-        http = self.credentials.authorize(http)
+#         # Create an httplib2.Http object to handle our HTTP requests and
+#         # authorize it with our credentials from self.cred_init
+#         http = httplib2.Http()
+#         http = self.credentials.authorize(http)
 
-        service = build('calendar', 'v3', http=http)
+#         service = build('calendar', 'v3', http=http)
 
-        # current timestamp
-        now = datetime.datetime.utcnow().isoformat('T')+'Z'
-        data = {}
+#         # current timestamp
+#         now = datetime.datetime.utcnow().isoformat('T')+'Z'
+#         data = {}
 
-        calendars = service.calendarList().list().execute()
+#         calendars = service.calendarList().list().execute()
 
-        all_events = []
-        for calendar in calendars.get('items', []):
-            # grab the next event
-            events = service.events().list(
-                calendarId=calendar['id'],
-                singleEvents=True,
-                timeMin=now,
-                maxResults='1',
-                orderBy='startTime'
-            ).execute()
+#         all_events = []
+#         for calendar in calendars.get('items', []):
+#             # grab the next event
+#             events = service.events().list(
+#                 calendarId=calendar['id'],
+#                 singleEvents=True,
+#                 timeMin=now,
+#                 maxResults='1',
+#                 orderBy='startTime'
+#             ).execute()
 
-            # get items list
-            try:
-                event = events.get('items', [])[0]
-                all_events.append(event)
-            except IndexError:
-                continue
+#             # get items list
+#             try:
+#                 event = events.get('items', [])[0]
+#                 all_events.append(event)
+#             except IndexError:
+#                 continue
 
-        print(all_events)
-        event = sorted(all_events, key=get_event_start)[0]
+#         print(all_events)
+#         event = sorted(all_events, key=get_event_start)[0]
 
-        # get reminder time
-        try:
-            remindertime = datetime.timedelta(
-                0,
-                int(
-                    event.get('reminders').get('overrides')[0].get('minutes')
-                ) * 60
-            )
-        except:
-            remindertime = datetime.timedelta(0, 0)
+#         # get reminder time
+#         try:
+#             remindertime = datetime.timedelta(
+#                 0,
+#                 int(
+#                     event.get('reminders').get('overrides')[0].get('minutes')
+#                 ) * 60
+#             )
+#         except:
+#             remindertime = datetime.timedelta(0, 0)
 
-        #format the data
-        event_start = dateutil.parser.parse(get_event_start(event),
-                                            ignoretz=True)
+#         #format the data
+#         event_start = dateutil.parser.parse(get_event_start(event),
+#                                             ignoretz=True)
 
-        data = {
-            'next_event': {
-                'description': event['summary'],
-                'date': event_start
-            }
-        }
-        if dateutil.parser.parse(
-                get_event_start(event),
-                ignoretz=True
-                ) - remindertime <= datetime.datetime.now():
-            template = '<span color="{color}">{description}</span>'
-            data['next_event']['description'] = template.format(color=utils.hex(self.reminder_color),
-                                                                description=data['next_event']['description'])
+#         data = {
+#             'next_event': {
+#                 'description': event['summary'],
+#                 'date': event_start
+#             }
+#         }
+#         if dateutil.parser.parse(
+#                 get_event_start(event),
+#                 ignoretz=True
+#                 ) - remindertime <= datetime.datetime.now():
+#             template = '<span color="{color}">{description}</span>'
+#             data['next_event']['description'] = template.format(color=utils.hex(self.reminder_color),
+#                                                                 description=data['next_event']['description'])
 
-        # return the data
-        return data
+#         # return the data
+#         return data
 
 
-def get_event_start(event):
-    if 'dateTime' in event['start']:
-        return event['start']['dateTime']
-    elif 'date' in event['start']:
-        return event['start']['date']
+# def get_event_start(event):
+#     if 'dateTime' in event['start']:
+#         return event['start']['dateTime']
+#     elif 'date' in event['start']:
+#         return event['start']['date']

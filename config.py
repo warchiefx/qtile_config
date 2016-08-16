@@ -9,7 +9,7 @@ from subprocess import check_output
 from widgets import *
 import os
 import re
-import commands
+import subprocess
 
 # The screens variable contains information about what bars are drawn where on
 # each screen. If you have multiple screens, you'll need to construct multiple
@@ -18,7 +18,7 @@ import commands
 RESOURCE_PATH = os.path.join(os.path.dirname(__file__), 'resources')
 
 widget_defaults = {
-    'font': "Envy Code R",
+    'font': "Hack",
     'fontsize': 12,
     'background': '#000000',
     'foreground': '#BBBBBB'
@@ -201,7 +201,7 @@ def get_conf(app_spec):
 def is_running(process):
     s = subprocess.Popen(["ps", "axuw"], stdout=subprocess.PIPE)
     for x in s.stdout:
-        if re.search(process, x):
+        if re.search(process, x.decode('utf-8')):
             return True
     return False
 
@@ -262,31 +262,6 @@ DUAL_SCREEN_CONFIG = [
             # Current window name.
             widget.WindowName(font="Fira", fontsize=12),
 
-            widget.Notify(foreground="#D7aa00", font=widget_defaults['font'], fontsize=widget_defaults['fontsize'],
-                          background=widget_defaults['background']),
-            # WcxWlan(**widget_defaults),
-            # widget.NetGraph(width=42, interface="wlan0", bandwidth_type="down",
-            #                 graph_color="#DDDDDD", fill_color="#EEEEEE", border_color='#111111'),
-            # widget.NetGraph(width=42, interface="wlan0", bandwidth_type="up",
-            #                 graph_color="#AAAAAA", fill_color="#888888", border_color='#111111'),
-            # widget.Sep(**sep_defaults),
-            widget.BatteryIcon(theme_path=os.path.join(RESOURCE_PATH, 'battery-icons')),
-            WcxBatteryWidget(
-                battery_name='BAT0',
-                energy_now_file='charge_now',
-                energy_full_file='charge_full',
-                power_now_file='current_now',
-                foreground="#A1A1A1",
-                charge_char='↑',
-                discharge_char='↓',
-                padding=4,
-                font=widget_defaults['font'], fontsize=widget_defaults['fontsize'], background=widget_defaults['background'],
-                format='{char} {percent:2.0%} ({hour:d}:{min:02d})',
-                update_interval=5,
-            ),
-            # widget.Sep(**sep_defaults),
-            widget.Systray(background=widget_defaults['background']),
-            # widget.Sep(**sep_defaults),
             widget.Clock(format='%a %d %b', **widget_defaults),
             widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
                          fontsize=widget_defaults['fontsize'],
@@ -303,7 +278,7 @@ DUAL_SCREEN_CONFIG = [
                                 net_label_foreground="#DDDDDD",
                                 **widget_defaults),
                         widget.Spacer(width=bar.STRETCH),
-                        EmacsTask(label_color="#DDDDDD", **widget_defaults),
+                        TaskWarriorWidget(label_color="#DDDDDD", **widget_defaults),
                         # WCXGcalWidget(www_group='personal', storage_file='/home/warchiefx/.config/qtile/gcal.settings',
                         #              update_interval=900, calendar='primary',
                         #             reminder_color="#D7aa00",
@@ -323,6 +298,25 @@ DUAL_SCREEN_CONFIG = [
                         # Current window name.
                         widget.WindowName(font="Fira", fontsize=12),
                         #widget.Sep(**sep_defaults),
+                        widget.Notify(foreground="#D7aa00", font=widget_defaults['font'], fontsize=widget_defaults['fontsize'],
+                                      background=widget_defaults['background']),
+                        # widget.BatteryIcon(theme_path=os.path.join(RESOURCE_PATH, 'battery-icons')),
+                        widget.Battery(
+                            battery_name='BAT0',
+                            # energy_now_file='charge_now',
+                            # energy_full_file='charge_full',
+                            # power_now_file='current_now',
+                            foreground="#A1A1A1",
+                            charge_char='↑',
+                            discharge_char='↓',
+                            padding=4,
+                            font=widget_defaults['font'], fontsize=widget_defaults['fontsize'], background=widget_defaults['background'],
+                            format='Batt: {char} {percent:2.0%} ({hour:d}:{min:02d})',
+                            update_interval=5,
+                        ),
+                        widget.Sep(**sep_defaults),
+                        widget.Systray(background=widget_defaults['background']),
+                        widget.Sep(**sep_defaults),
                         widget.Clock(format='%a %d %b', **widget_defaults),
                         widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
                                      fontsize=widget_defaults['fontsize'],
@@ -339,8 +333,13 @@ DUAL_SCREEN_CONFIG = [
                        mem_label_foreground="#DDDDDD", upload_foreground="#AAAAAA",
                        net_label_foreground="#DDDDDD",
                        **widget_defaults),
+               widget.Sep(**sep_defaults),
+               widget.ThermalSensor(tag_sensor="temp1", threshold=86,
+                                    markup=True, show_tag=True, **widget_defaults),
+               widget.Sep(**sep_defaults),
+               widget.Net(interface="wlan0", markup=True, **widget_defaults),
                widget.Spacer(width=bar.STRETCH),
-               EmacsTask(label_color="#DDDDDD", **widget_defaults),
+               TaskWarriorWidget(label_color="#DDDDDD", **widget_defaults),
            ], 20, background=widget_defaults['background'], opacity=1))
 ]
 
@@ -376,18 +375,18 @@ SINGLE_SCREEN_CONFIG = [
             # widget.NetGraph(width=42, interface="wlan0", bandwidth_type="up",
             #                 graph_color="#AAAAAA", fill_color="#888888", border_color='#111111'),
             # widget.Sep(**sep_defaults),
-            widget.BatteryIcon(theme_path=os.path.join(RESOURCE_PATH, 'battery-icons')),
-            WcxBatteryWidget(
+            # widget.BatteryIcon(theme_path=os.path.join(RESOURCE_PATH, 'battery-icons')),
+            widget.Battery(
                 battery_name='BAT0',
-                energy_now_file='charge_now',
-                energy_full_file='charge_full',
-                power_now_file='current_now',
+                # energy_now_file='charge_now',
+                # energy_full_file='charge_full',
+                # power_now_file='current_now',
                 foreground="#A1A1A1",
                 charge_char='↑',
                 discharge_char='↓',
                 padding=4,
                 font=widget_defaults['font'], fontsize=widget_defaults['fontsize'], background=widget_defaults['background'],
-                format='{char} {percent:2.0%} ({hour:d}:{min:02d})',
+                format='Batt: {char} {percent:2.0%} ({hour:d}:{min:02d})',
                 update_interval=5,
             ),
             widget.Sep(**sep_defaults),
@@ -408,6 +407,12 @@ SINGLE_SCREEN_CONFIG = [
                                 mem_label_foreground="#DDDDDD", upload_foreground="#AAAAAA",
                                 net_label_foreground="#DDDDDD",
                                 **widget_defaults),
+                        widget.Sep(**sep_defaults),
+
+                        widget.ThermalSensor(tag_sensor="temp1", threshold=86,
+                                             markup=True, show_tag=True, **widget_defaults),
+                        widget.Sep(**sep_defaults),
+                        widget.Net(interface="wlan0", markup=True, **widget_defaults),
                         widget.Spacer(width=bar.STRETCH),
                         EmacsTask(label_color="#DDDDDD", **widget_defaults),
                         # WCXGcalWidget(www_group='personal', storage_file='/home/warchiefx/.config/qtile/gcal.settings',
@@ -426,10 +431,11 @@ SCREEN_CONFIGS = {
 
 
 def get_number_of_screens():
-    status, out = commands.getstatusoutput('xrandr | grep "\\bconnected\\b" | wc -l')
-    if status == 0:
+    try:
+        out = subprocess.check_output('xrandr | grep "\\bconnected\\b" | wc -l', shell=True)
         return int(out)
-    return 1
+    except subprocess.CalledProcessError:
+        return 1
 
 num_screens = get_number_of_screens()
 
