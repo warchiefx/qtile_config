@@ -495,7 +495,7 @@ keys = [
     # start specific apps
     Key([mod], "w",              lazy.spawn("google-chrome-stable")),
     Key([mod, "shift"], "w",     lazy.spawn("firefox")),
-    Key([mod], "m",              lazy.spawn("nylas")),
+    Key([mod], "m",              lazy.spawn("evolution")),
     Key([mod], "s",              lazy.spawn("slack")),
     Key([mod], "Return",         lazy.spawn("terminator")),
     Key([mod], "a",              lazy.function(spawn_app_or_group("spotify"))),
@@ -504,7 +504,7 @@ keys = [
     Key([mod, 'shift'], "v",     lazy.function(spawn_app_or_group("xbmc"))),
     # Key([mod], "s",              lazy.function(spawn_app_or_group("skype"))),
     Key([mod], "d",              lazy.spawn("lxappearance")),
-    Key([mod], "p",              lazy.function(spawn_app_or_group("franz"))),
+    Key([mod], "p",              lazy.function(spawn_app_or_group("telegram-desktop"))),
     Key([mod], "b",              lazy.function(spawn_app_or_group("transmission-gtk"))),
     Key([mod], "t",              lazy.function(spawn_app_or_group("hotot-gtk3"))),
     Key([mod], "f",              lazy.spawn("gnome-commander")),
@@ -538,12 +538,13 @@ groups = [
           matches=[Match(wm_class=['Terminator', 'Emacs'])],
           position=4),
     Group('work', position=5),
+    Group("media", persist=True, init=True,
+          matches=[Match(wm_class=["Vlc", "Banshee", "xbmc.bin", 'Amarok', 'Spotify'
+                                   'Clementine', 'nuvolaplayer'], wm_instance_class=['spotify'])]
+          ),
     Group('gaming', persist=True, init=False,
           matches=[Match(wm_class=['LoLPatcherUx.exe', 'LoLClient.exe', 'Wine', 'Steam'])],),
-    Group("media", persist=True, init=False,
-          matches=[Match(wm_class=["Vlc", "Banshee", "xbmc.bin", 'Amarok', 'spotify', 'Spotify'
-                                   'Clementine', 'nuvolaplayer'])]
-          ),
+
 ]
 
 # dgroup rules that not belongs to any group
@@ -562,7 +563,7 @@ dgroups_app_rules = [
                ),
          float=True, group='gaming'),
     Rule(Match(wm_class=['LoLPatcherUx.exe', 'LoLClient.exe']), float=True),
-    Rule(Match(wm_class=['spotify', 'Spotify']), group='media'),
+    Rule(Match(wm_class=['Spotify'], wm_instance_class=['spotify'], title='Spotify'), group='media', intrusive=True),
     ]
 
 # auto bind keys to dgroups mod+1 to 9
