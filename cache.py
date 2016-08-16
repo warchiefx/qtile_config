@@ -16,8 +16,8 @@ __all__ = ['to_ascii', 'to_str', 'cache_key_generator', 'cache', 'configure_cach
 
 
 def to_ascii(ze_text):
-    if not isinstance(ze_text, unicode):
-        ze_text = unicode(ze_text)
+    if not isinstance(ze_text, str):
+        ze_text = str(ze_text)
     return unicodedata.normalize('NFKD', ze_text).encode('ascii', 'ignore')
 
 
@@ -55,8 +55,9 @@ def cache_key_generator(namespace, fn, to_str=to_str):
                 args = args[1:]
 
         # Some key manglers don't like non-ascii inputs, normalize
-        key = namespace + "|" + " ".join(map(to_str, args))
-        return key
+        key = "{nspc}|{data}".format(nspc=to_ascii(namespace),
+                                     data=" ".join(map(to_str, args)))
+        return key.encode("ascii")
     return generate_key
 
 
