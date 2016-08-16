@@ -9,6 +9,7 @@ from libqtile import config as settings
 from libqtile.pangocffi import markup_escape_text
 import dbus
 import os
+import re
 import platform
 from collections import defaultdict
 from cache import configure_cache
@@ -18,6 +19,7 @@ from datetime import datetime
 
 
 cache = configure_cache({'warchiefx.qtile.caching.expiration_time': 10})
+TASK_RE = re.compile(r"#(\d+):\[\S+\] [\S ]+")
 
 
 def ensure_connected(f):
@@ -261,10 +263,28 @@ class TaskWarriorWidget(ThreadedPollText):
             if active_tasks:
                 task = active_tasks.get()
                 task.stop()
-                task.save()
+            else:
+                tasks = "\n".join("#{id}:[{project}] {desc}".format(id=t['id'],
+                                                                    project=t['project'],
+                                                                    desc=t['description'])
+                                  for t in sorted(self.tw.tasks.pending(), key=lambda x: x['urgency'],
+                                                  reverse=True))
+                cmd = 'dmenu -p "Start? >" -fn "Envy Code R-10" -sb "#DDDDDD" -sf "#000000" -nb "#000000" -i -l 10'
+                try:
+                    result = subprocess.run(cmd, input=tasks,
+                                            stdout=subprocess.PIPE, check=True,
+                                            universal_newlines=True, shell=True)
+                    selection = result.stdout
+                    match = TASK_RE.match(selection)
+                    if match:
+                        task_id = match.group(1)
+                        task = self.tw.tasks.get(id=task_id)
+                        task.start()
+                except subprocess.CalledProcessError:
+                    pass
         elif button == 3:
             self.tw.execute_command(['sync'])
-        super(TaskWarriorWidget, self).button_press(self, x, y, button)
+        super(TaskWarriorWidget, self).button_press(x, y, button)
 
 
 class HototWidget(_TextBox):
