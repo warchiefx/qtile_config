@@ -414,7 +414,7 @@ SINGLE_SCREEN_CONFIG = [
                         widget.Sep(**sep_defaults),
                         widget.Net(interface="wlan0", markup=True, **widget_defaults),
                         widget.Spacer(width=bar.STRETCH),
-                        EmacsTask(label_color="#DDDDDD", **widget_defaults),
+                        TaskWarriorWidget(label_color="#DDDDDD", **widget_defaults),
                         # WCXGcalWidget(www_group='personal', storage_file='/home/warchiefx/.config/qtile/gcal.settings',
                         #              update_interval=900, calendar='primary',
                         #             reminder_color="#D7aa00",
