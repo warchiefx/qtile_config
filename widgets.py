@@ -13,6 +13,8 @@ import platform
 from collections import defaultdict
 from cache import configure_cache
 import subprocess
+from tasklib import TaskWarrior, local_zone
+from datetime import datetime
 
 
 cache = configure_cache({'warchiefx.qtile.caching.expiration_time': 10})
@@ -208,6 +210,61 @@ class EmacsTask(ThreadedPollText):
             text = "(No current task)"
 
         return text
+
+
+class TaskWarriorWidget(ThreadedPollText):
+    defaults = [
+        ("font", "Arial", "Font"),
+        ("fontsize", None, "Pixel size. Calculated if None."),
+        ("fontshadow", None,
+            "font shadow color, default is None(no shadow)"),
+        ("padding", None, "Padding. Calculated if None."),
+        ("background", None, "Background colour"),
+        ("foreground", "ffffff", "Foreground colour"),
+        ("label_color", "#5555dd", "Color for the task label"),
+        ('update_interval', 5, 'The update interval.'),
+    ]
+
+    def __init__(self, **config):
+        super(TaskWarriorWidget, self).__init__(**config)
+        self.add_defaults(self.defaults)
+        self.tw = TaskWarrior()
+
+    def _configure(self, qtile, bar):
+        super(TaskWarriorWidget, self)._configure(qtile, bar)
+        self.layout = self.drawer.textlayout(
+            self.text, self.foreground, self.font,
+            self.fontsize, self.fontshadow, markup=True)
+
+    def format_timer(self, delta):
+        hours, mins, seconds = str(delta).split(":", 3)
+        return "{hh}:{mm}".format(hh=hours, mm=mins)
+
+    def poll(self):
+        text = ''
+        active_tasks = self.tw.tasks.filter('+ACTIVE')
+        if active_tasks:
+            task = active_tasks.get()
+            time = self.format_timer(local_zone.localize(datetime.now()) - task['start'])
+            text = '<span weight="bold" color="{label_color}">Task:</span><span> {timer} [<i>#{id}</i>|{project}] {description}</span>'.format(timer=time, description=task['description'],
+                                                                                                                                               project=task['project'], label_color=self.label_color,
+                                                                                                                                               id=task['id'])
+        else:
+            text = '(No current task) / B:{blocker_count} | O:{overdue_count} | T:{today_count}'.format(blocker_count=len(self.tw.tasks.pending().filter('+BLOCKING')),
+                                                                                                        overdue_count=len(self.tw.tasks.pending().filter('+OVERDUE')),
+                                                                                                        today_count=len(self.tw.tasks.pending().filter('+DUETODAY')))
+        return text
+
+    def button_press(self, x, y, button):
+        if button == 1:
+            active_tasks = self.tw.tasks.filter('+ACTIVE')
+            if active_tasks:
+                task = active_tasks.get()
+                task.stop()
+                task.save()
+        elif button == 3:
+            self.tw.execute_command(['sync'])
+        super(TaskWarriorWidget, self).button_press(self, x, y, button)
 
 
 class HototWidget(_TextBox):
