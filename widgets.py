@@ -14,12 +14,12 @@ import platform
 from collections import defaultdict
 from cache import configure_cache
 import subprocess
-from tasklib import TaskWarrior, local_zone
-from datetime import datetime
+from tasklib import TaskWarrior, local_zone, Task
+from datetime import datetime, timedelta
+import html
 
 
 cache = configure_cache({'warchiefx.qtile.caching.expiration_time': 10})
-TASK_RE = re.compile(r"#(\d+):\[\S+\] [\S ]+")
 
 
 def ensure_connected(f):
@@ -227,6 +227,10 @@ class TaskWarriorWidget(ThreadedPollText):
         ('update_interval', 5, 'The update interval.'),
     ]
 
+    TASK_RE = re.compile(r"#(\d+):\[\S+\] [\S ]+")
+    OPTION_RE = re.compile(r'([\S]+):([\S]+)')
+    TAG_RE = re.compile(r' \+([\S]+)')
+
     def __init__(self, **config):
         super(TaskWarriorWidget, self).__init__(**config)
         self.add_defaults(self.defaults)
@@ -238,8 +242,17 @@ class TaskWarriorWidget(ThreadedPollText):
             self.text, self.foreground, self.font,
             self.fontsize, self.fontshadow, markup=True)
 
-    def format_timer(self, delta):
+    def format_timer(self, task):
+        delta = local_zone.localize(datetime.now()) - task['start']
         hours, mins, seconds = str(delta).split(":", 3)
+
+        total_active_time = re.sub(r'\D+', '', task['totalactivetime'] or '')
+        if total_active_time:
+            total = timedelta(seconds=int(total_active_time))
+            total_hours, total_mins, total_seconds = str(total).split(":", 3)
+            return "{hh}:{mm}|{hht}:{hhm}".format(hh=hours, mm=mins,
+                                                  hht=total_hours, hhm=total_mins)
+
         return "{hh}:{mm}".format(hh=hours, mm=mins)
 
     def poll(self):
@@ -247,12 +260,12 @@ class TaskWarriorWidget(ThreadedPollText):
         active_tasks = self.tw.tasks.filter('+ACTIVE')
         if active_tasks:
             task = active_tasks.get()
-            time = self.format_timer(local_zone.localize(datetime.now()) - task['start'])
-            text = '<span weight="bold" color="{label_color}">Task:</span><span> {timer} [<i>#{id}</i>|{project}] {description}</span>'.format(timer=time, description=task['description'],
+            time = self.format_timer(task)
+            text = '<span weight="bold" color="{label_color}">Task:</span><span> {timer} [<i>#{id}</i>|{project}] {description}</span>'.format(timer=time, description=html.escape(task['description']),
                                                                                                                                                project=task['project'], label_color=self.label_color,
                                                                                                                                                id=task['id'])
         else:
-            text = '(No current task) / B:{blocker_count} | O:{overdue_count} | T:{today_count}'.format(blocker_count=len(self.tw.tasks.pending().filter('+BLOCKING')),
+            text = '(No current task) / O:<span color="#ffffff" weight="bold">{overdue_count}</span> | T:<span color="#ffffff" weight="bold">{today_count}</span> | B:<span color="#ffffff" weight="bold">{blocker_count}</span>'.format(blocker_count=len(self.tw.tasks.pending().filter('+BLOCKING')),
                                                                                                         overdue_count=len(self.tw.tasks.pending().filter('+OVERDUE')),
                                                                                                         today_count=len(self.tw.tasks.pending().filter('+DUETODAY')))
         return text
@@ -264,24 +277,45 @@ class TaskWarriorWidget(ThreadedPollText):
                 task = active_tasks.get()
                 task.stop()
             else:
-                tasks = "\n".join("#{id}:[{project}] {desc}".format(id=t['id'],
-                                                                    project=t['project'],
-                                                                    desc=t['description'])
+                tasks = "\n".join("#{id}:[{project}] {desc} | +{tags}".format(id=t['id'],
+                                                                              project=t['project'],
+                                                                              desc=t['description'],
+                                                                              tags=" +".join(t['tags']) or "(untagged)"
+                )
                                   for t in sorted(self.tw.tasks.pending(), key=lambda x: x['urgency'],
                                                   reverse=True))
-                cmd = 'dmenu -p "Start? >" -fn "Envy Code R-10" -sb "#DDDDDD" -sf "#000000" -nb "#000000" -i -l 10'
+                cmd = 'dmenu -p "Start task? >" -fn "Hack-10" -sb "#DDDDDD" -sf "#000000" -nb "#000000" -i -l 10 -b'
                 try:
                     result = subprocess.run(cmd, input=tasks,
                                             stdout=subprocess.PIPE, check=True,
                                             universal_newlines=True, shell=True)
                     selection = result.stdout
-                    match = TASK_RE.match(selection)
+                    match = self.TASK_RE.match(selection)
                     if match:
                         task_id = match.group(1)
                         task = self.tw.tasks.get(id=task_id)
                         task.start()
+                    else:
+                        options = dict(self.OPTION_RE.findall(selection))
+                        tags = self.TAG_RE.findall(selection)
+                        descr = self.OPTION_RE.sub('', selection).strip()
+                        descr = self.TAG_RE.sub('', descr).strip()
+                        task = Task(self.tw, description=descr)
+                        if options:
+                            for k, v in options.items():
+                                task[k] = v
+                        if tags:
+                            task['tags'] = tags
+                        task.save()
+
+                        task.start()
                 except subprocess.CalledProcessError:
                     pass
+        elif button == 2:
+            active_tasks = self.tw.tasks.filter('+ACTIVE')
+            if active_tasks:
+                task = active_tasks.get()
+                task.done()
         elif button == 3:
             self.tw.execute_command(['sync'])
         super(TaskWarriorWidget, self).button_press(x, y, button)
