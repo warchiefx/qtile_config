@@ -4,7 +4,6 @@
 #xcompmgr
 nm-applet &
 #source ~/.fehbg 
-(sleep 500 && dropbox &)
 #blueman-applet &
 volumeicon &
 xscreensaver -no-splash &
