@@ -11,10 +11,6 @@ import os
 import re
 import subprocess
 
-# The screens variable contains information about what bars are drawn where on
-# each screen. If you have multiple screens, you'll need to construct multiple
-# Screen objects, each with whatever widgets you want.
-
 RESOURCE_PATH = os.path.join(os.path.dirname(__file__), 'resources')
 
 widget_defaults = {
@@ -474,8 +470,8 @@ keys = [
     Key([mod], "F7",              lazy.spawn('/home/warchiefx/.scripts/enable_monitor')),
     Key([mod, 'shift'], "F7",              lazy.spawn('/home/warchiefx/.scripts/disable_monitor')),
 
-    Key([], 'XF86KbdBrightnessUp',  lazy.spawn("xbacklight -inc 10")),
-    Key([], 'XF86KbdBrightnessDown',  lazy.spawn("xbacklight -dec 10")),
+    Key([], 'XF86MonBrightnessUp',  lazy.spawn("xbacklight -inc 10")),
+    Key([], 'XF86MonBrightnessDown',  lazy.spawn("xbacklight -dec 10")),
 
     # interact with prompts
     Key(["mod1"], "F2",              lazy.spawn('dmenu_run -p "Run? >" -fn "Envy Code R-10" -sb "#DDDDDD" -sf "#000000" -nb "#000000"')),
@@ -493,7 +489,7 @@ keys = [
 
 
     # start specific apps
-    Key([mod], "w",              lazy.spawn("google-chrome-stable")),
+    Key([mod], "w",              lazy.spawn("google-chrome")),
     Key([mod, "shift"], "w",     lazy.spawn("firefox")),
     Key([mod], "m",              lazy.spawn("evolution")),
     Key([mod], "s",              lazy.spawn("slack")),
@@ -511,8 +507,8 @@ keys = [
     Key([mod], "e",              lazy.function(spawn_app_or_group("emacs"))),
 
     # Special functions
-    Key([], "Print",             lazy.spawn("gnome-screenshot")),
-    Key(["shift"], "Print",      lazy.spawn("gnome-screenshot -a -i")),
+    Key([], "Print",             lazy.spawn("shutter -f")),  # Capture full screen
+    Key(["shift"], "Print",      lazy.spawn("shutter -s")),  # Capture selection
     Key([], "Pause",             lazy.spawn("xscreensaver-command --lock")),
 ]
 
