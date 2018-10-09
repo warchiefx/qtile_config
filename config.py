@@ -606,6 +606,7 @@ def startup():
     execute_once('setxkbmap -layout us_intl -option ctrl:swapcaps')
     execute_once('autorandr --change')
     execute_once('volumeicon')
+    execute_once('nm-applet')
     execute_once('gnome-screensaver')
 
 
