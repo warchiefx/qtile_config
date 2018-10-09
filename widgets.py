@@ -12,14 +12,14 @@ import os
 import re
 import platform
 from collections import defaultdict
-from cache import configure_cache
+#from cache import configure_cache
 import subprocess
 from tasklib import TaskWarrior, local_zone, Task
 from datetime import datetime, timedelta
 import html
 
 
-cache = configure_cache({'warchiefx.qtile.caching.expiration_time': 10})
+#cache = configure_cache({'warchiefx.qtile.caching.expiration_time': 10})
 
 
 def ensure_connected(f):
@@ -117,29 +117,29 @@ class AmarokWidget(Mpris):
             self.bar.draw()
 
 
-class WcxWlan(object):
-    defaults = [
-        ("font", "Arial", "Font"),
-        ("fontsize", None, "Pixel size. Calculated if None."),
-        ("fontshadow", None,
-            "font shadow color, default is None(no shadow)"),
-        ("padding", None, "Padding. Calculated if None."),
-        ("background", None, "Background colour"),
-        ("foreground", "ffffff", "Foreground colour")
-    ]
+# class WcxWlan(object):
+#     defaults = [
+#         ("font", "Arial", "Font"),
+#         ("fontsize", None, "Pixel size. Calculated if None."),
+#         ("fontshadow", None,
+#             "font shadow color, default is None(no shadow)"),
+#         ("padding", None, "Padding. Calculated if None."),
+#         ("background", None, "Background colour"),
+#         ("foreground", "ffffff", "Foreground colour")
+#     ]
 
-    def __init__(self, interface="wlan0", width=bar.CALCULATED, **kwargs):
-        super(WcxWlan, self).__init__(interface=interface, **kwargs)
+#     def __init__(self, interface="wlan0", width=bar.CALCULATED, **kwargs):
+#         super(WcxWlan, self).__init__(interface=interface, **kwargs)
 
-    def update(self):
-        if self.configured:
-            interface = Wireless(self.interface)
-            essid = interface.getEssid()
-            text = "{}".format(essid)
-            if self.text != text:
-                self.text = text
-                self.bar.draw()
-        return "Not Connected"
+#     def update(self):
+#         if self.configured:
+#             interface = Wireless(self.interface)
+#             essid = interface.getEssid()
+#             text = "{}".format(essid)
+#             if self.text != text:
+#                 self.text = text
+#                 self.bar.draw()
+#         return "Not Connected"
 
 
 class WcxBatteryWidget(ThreadedPollText, Battery):
@@ -213,6 +213,11 @@ class EmacsTask(ThreadedPollText):
 
         return text
 
+    def button_press(self, x, y, button):
+        if button == 1:
+            subprocess.check_output(['emacsclient', '-e', '(org-clock-out)'])
+        super(EmacsTask, self).button_press(x, y, button)
+
 
 class TaskWarriorWidget(ThreadedPollText):
     defaults = [
@@ -247,7 +252,7 @@ class TaskWarriorWidget(ThreadedPollText):
         hours, mins, seconds = str(delta).split(":", 3)
 
         total_active_time = re.sub(r'\D+', '', task['totalactivetime'] or '')
-        if total_active_time:
+        if total_active_time and 'ongoing' not in task['tags']:
             total = timedelta(seconds=int(total_active_time))
             total_hours, total_mins, total_seconds = str(total).split(":", 3)
             return "{hh}:{mm}|{hht}:{hhm}".format(hh=hours, mm=mins,
@@ -284,7 +289,7 @@ class TaskWarriorWidget(ThreadedPollText):
                 )
                                   for t in sorted(self.tw.tasks.pending(), key=lambda x: x['urgency'],
                                                   reverse=True))
-                cmd = 'dmenu -p "Start task? >" -fn "Hack-10" -sb "#DDDDDD" -sf "#000000" -nb "#000000" -i -l 10 -b'
+                cmd = 'dmenu -p "Start task? >" -fn "Iosevka-10" -sb "#DDDDDD" -sf "#000000" -nb "#000000" -i -l 10 -b'
                 try:
                     result = subprocess.run(cmd, input=tasks,
                                             stdout=subprocess.PIPE, check=True,
@@ -315,7 +320,10 @@ class TaskWarriorWidget(ThreadedPollText):
             active_tasks = self.tw.tasks.filter('+ACTIVE')
             if active_tasks:
                 task = active_tasks.get()
-                task.done()
+                if 'ongoing' not in task['tags']:
+                    task.done()
+                else:
+                    task.stop()
         elif button == 3:
             self.tw.execute_command(['sync'])
         super(TaskWarriorWidget, self).button_press(x, y, button)
@@ -399,7 +407,7 @@ class Metrics(ThreadedPollText):
         stat = open('/proc/loadavg').readline().split(" ")[:3]
         return '<span weight="bold" color="{cpu_label_foreground}">Load Avg:</span> {stat}'.format(stat=", ".join(stat), cpu_label_foreground=self.cpu_label_foreground)
 
-    @cache.cache_on_arguments()
+    #@cache.cache_on_arguments()
     def read_sensors(self):
         # TODO: Find another sensor library, this one breaks qtile
         results = defaultdict(dict)

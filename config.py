@@ -14,7 +14,7 @@ import subprocess
 RESOURCE_PATH = os.path.join(os.path.dirname(__file__), 'resources')
 
 widget_defaults = {
-    'font': "Hack",
+    'font': "Iosevka",
     'fontsize': 12,
     'background': '#000000',
     'foreground': '#BBBBBB'
@@ -48,7 +48,7 @@ APP_MAP = {
         'cmd': 'nautilus',
         'extra_args': {
             'floating': True,
-       },
+        },
     },
     ('variety', 'Variety'): {
         'cmd': 'variety',
@@ -76,29 +76,28 @@ APP_MAP = {
         'group': 'media',
         'cmd': 'amarok',
     },
-    ('spotify', 'Spotify'): {
+    ('Spotify', 'Spotify'): {
         'group': 'media',
-        'cmd': 'spotify',
-    },
-    ("nylas n1", "Nylas N1"): {
-        'group': 'mail',
-        'cmd': 'nylas',
-        'extra_args': {
-            'floating': True
-        }
+        'cmd': 'flatpak run com.spotify.Client',
     },
     ("evolution", "Evolution"): {
         'group': 'mail',
         'cmd': 'evolution',
         'extra_args': {
-            'floating': True
+
+        }
+    },
+    ("geary", "Geary"): {
+        'group': 'mail',
+        'cmd': 'geary',
+        'extra_args': {
+
         }
     },
     ('slack', 'Slack'): {
-        'group': 'slack',
-        'cmd': 'slack',
+        'group': 'chat',
+        'cmd': 'flatpak run com.slack.Slack',
         'extra_args': {
-            'floating': True
         }
     },
     ('nuvolaplayer', 'nuvolaplayer'): {
@@ -120,11 +119,11 @@ APP_MAP = {
             'floating': True
         }
     },
-    ('Telegram', 'Telegram'): {
+    ('telegram-desktop', 'TelegramDesktop'): {
         'group': 'chat',
-        'cmd': 'telegram',
+        'cmd': 'flatpak run org.telegram.desktop',
         'extra_args': {
-            'floating': True
+            # 'floating': True
         }
     },
     ('franz', 'Franz'): {
@@ -259,10 +258,10 @@ DUAL_SCREEN_CONFIG = [
             widget.WindowName(font="Fira", fontsize=12),
 
             widget.Clock(format='%a %d %b', **widget_defaults),
-            widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
+            widget.Clock(format='%H:%M', foreground="#DDDDDD", font=widget_defaults['font'],
                          fontsize=widget_defaults['fontsize'],
                          background=widget_defaults['background']),
-        ], 20, background=widget_defaults['background'], opacity=1),
+        ], 20, background=widget_defaults['background'], opacity=0.94),
         bottom=bar.Bar([HostInfo(separator_color='#777777', **widget_defaults),
                         widget.Sep(**sep_defaults),
                         # widget.CPUGraph(width=80, line_width=2, border_color='#111111',
@@ -274,13 +273,13 @@ DUAL_SCREEN_CONFIG = [
                                 net_label_foreground="#DDDDDD",
                                 **widget_defaults),
                         widget.Spacer(width=bar.STRETCH),
-                        TaskWarriorWidget(label_color="#DDDDDD", **widget_defaults),
+                        EmacsTask(label_color="#DDDDDD", **widget_defaults),
                         # WCXGcalWidget(www_group='personal', storage_file='/home/warchiefx/.config/qtile/gcal.settings',
                         #              update_interval=900, calendar='primary',
                         #             reminder_color="#D7aa00",
                         #             **widget_defaults),
                         #AmarokWidget(**widget_defaults),
-                        ], 20, background=widget_defaults['background'], opacity=1)),
+                        ], 20, background=widget_defaults['background'], opacity=0.94)),
     Screen(top=bar.Bar([widget.GroupBox(urgent_alert_method='text', font=widget_defaults['font'],
                                         fontsize=widget_defaults['fontsize'],
                                         # margin_y = 1,
@@ -292,10 +291,10 @@ DUAL_SCREEN_CONFIG = [
                         widget.Sep(**sep_defaults),
                         # widget.WindowTabs(),
                         # Current window name.
-                        widget.WindowName(font="Fira", fontsize=12),
+                        widget.WindowName(font="Iosevka", fontsize=12),
                         #widget.Sep(**sep_defaults),
-                        widget.Notify(foreground="#D7aa00", font=widget_defaults['font'], fontsize=widget_defaults['fontsize'],
-                                      background=widget_defaults['background']),
+                        # widget.Notify(foreground="#D7aa00", font=widget_defaults['font'], fontsize=widget_defaults['fontsize'],
+                        #               background=widget_defaults['background']),
                         # widget.BatteryIcon(theme_path=os.path.join(RESOURCE_PATH, 'battery-icons')),
                         widget.Battery(
                             battery_name='BAT0',
@@ -314,10 +313,10 @@ DUAL_SCREEN_CONFIG = [
                         widget.Systray(background=widget_defaults['background']),
                         widget.Sep(**sep_defaults),
                         widget.Clock(format='%a %d %b', **widget_defaults),
-                        widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
+                        widget.Clock(format='%H:%M', foreground="#DDDDDD", font=widget_defaults['font'],
                                      fontsize=widget_defaults['fontsize'],
                                      background=widget_defaults['background']),
-    ], 20, background=widget_defaults['background'], opacity=1),
+    ], 20, background=widget_defaults['background'], opacity=0.94),
            bottom=bar.Bar([
                HostInfo(separator_color='#777777', **widget_defaults),
                widget.Sep(**sep_defaults),
@@ -335,8 +334,8 @@ DUAL_SCREEN_CONFIG = [
                widget.Sep(**sep_defaults),
                widget.Net(interface="wlan0", markup=True, **widget_defaults),
                widget.Spacer(width=bar.STRETCH),
-               TaskWarriorWidget(label_color="#DDDDDD", **widget_defaults),
-           ], 20, background=widget_defaults['background'], opacity=1))
+               EmacsTask(label_color="#DDDDDD", **widget_defaults),
+           ], 20, background=widget_defaults['background'], opacity=0.94))
 ]
 
 SINGLE_SCREEN_CONFIG = [
@@ -363,8 +362,8 @@ SINGLE_SCREEN_CONFIG = [
             # Current window name.
             widget.WindowName(font="Fira", fontsize=12),
 
-            widget.Notify(foreground="#D7aa00", font=widget_defaults['font'], fontsize=widget_defaults['fontsize'],
-                          background=widget_defaults['background']),
+            # widget.Notify(foreground="#D7aa00", font=widget_defaults['font'], fontsize=widget_defaults['fontsize'],
+            #               background=widget_defaults['background']),
             # WcxWlan(**widget_defaults),
             # widget.NetGraph(width=42, interface="wlan0", bandwidth_type="down",
             #                 graph_color="#DDDDDD", fill_color="#EEEEEE", border_color='#111111'),
@@ -389,10 +388,10 @@ SINGLE_SCREEN_CONFIG = [
             widget.Systray(background=widget_defaults['background']),
             widget.Sep(**sep_defaults),
             widget.Clock(format='%a %d %b', **widget_defaults),
-            widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
+            widget.Clock(format='%H:%M', foreground="#DDDDDD", font=widget_defaults['font'],
                          fontsize=widget_defaults['fontsize'],
                          background=widget_defaults['background']),
-        ], 20, background=widget_defaults['background'], opacity=1),
+        ], 20, background=widget_defaults['background'], opacity=0.94),
         bottom=bar.Bar([HostInfo(separator_color='#777777', **widget_defaults),
                         widget.Sep(**sep_defaults),
                         # widget.CPUGraph(width=80, line_width=2, border_color='#111111',
@@ -410,13 +409,13 @@ SINGLE_SCREEN_CONFIG = [
                         widget.Sep(**sep_defaults),
                         widget.Net(interface="wlan0", markup=True, **widget_defaults),
                         widget.Spacer(width=bar.STRETCH),
-                        TaskWarriorWidget(label_color="#DDDDDD", **widget_defaults),
+                        EmacsTask(label_color="#DDDDDD", **widget_defaults),
                         # WCXGcalWidget(www_group='personal', storage_file='/home/warchiefx/.config/qtile/gcal.settings',
                         #              update_interval=900, calendar='primary',
                         #             reminder_color="#D7aa00",
                         #             **widget_defaults),
                         #AmarokWidget(**widget_defaults),
-                        ], 20, background=widget_defaults['background'], opacity=1)),
+                        ], 20, background=widget_defaults['background'], opacity=0.94)),
 ]
 
 
@@ -428,8 +427,8 @@ SCREEN_CONFIGS = {
 
 def get_number_of_screens():
     try:
-        out = subprocess.check_output('xrandr | grep "\\bconnected\\b" | wc -l', shell=True)
-        return int(out)
+        out = subprocess.check_output('xrandr | awk /"connected [0-9]"/\'{print $1}\' | wc -l', shell=True)
+        return int(out) + 1
     except subprocess.CalledProcessError:
         return 1
 
@@ -438,15 +437,18 @@ num_screens = get_number_of_screens()
 screens = SCREEN_CONFIGS.get(num_screens, SINGLE_SCREEN_CONFIG)
 
 mod = "mod4"
+altkey = "mod1"
 # mod1 = Alt
 # mod4 = Win Key
+
+
 
 keys = [
     Key(["control", "mod4"], "q",  lazy.shutdown()),
     Key(["control", "mod4"], "r",  lazy.restart()),
 
-    Key([mod], "Left", lazy.screen.prevgroup()),
-    Key([mod], "Right", lazy.screen.nextgroup()),
+    Key([mod], "Left", lazy.screen.prev_group()),
+    Key([mod], "Right", lazy.screen.next_group()),
 
     Key([mod], "k",              lazy.layout.down()),
     Key([mod], "j",              lazy.layout.up()),
@@ -456,7 +458,7 @@ keys = [
     Key([mod], "l",              lazy.layout.next()),
     Key([mod, "shift"], "space", lazy.layout.rotate()),
     Key([mod, "shift"], "Return", lazy.layout.toggle_split()),
-    Key([mod], "Tab",            lazy.nextlayout()),
+    Key([mod], "space",            lazy.next_layout()),
     Key(["mod1"], "Tab",         lazy.layout.next()),
     Key(["mod1", 'shift'], "Tab", lazy.layout.prev()),
     Key([mod, "shift"], "Right", lazy.layout.increase_ratio()),
@@ -467,14 +469,18 @@ keys = [
 
     Key([mod], "x",              lazy.window.kill()),
 
-    Key([mod], "F7",              lazy.spawn('/home/warchiefx/.scripts/enable_monitor')),
-    Key([mod, 'shift'], "F7",              lazy.spawn('/home/warchiefx/.scripts/disable_monitor')),
+    Key([mod], "F7",              lazy.spawn('autorandr')),
 
-    Key([], 'XF86MonBrightnessUp',  lazy.spawn("xbacklight -inc 10")),
-    Key([], 'XF86MonBrightnessDown',  lazy.spawn("xbacklight -dec 10")),
+    Key([], 'XF86MonBrightnessUp',  lazy.spawn("xbacklight -ctrl intel_backlight -inc 10")),
+    Key([], 'XF86MonBrightnessDown',  lazy.spawn("xbacklight -ctrl intel_backlight -dec 10")),
+
+    Key([], "XF86AudioPlay", lazy.spawn("playerctl play-pause")),
+    Key([], "XF86AudioNext", lazy.spawn("playerctl next")),
+    Key([], "XF86AudioPrev", lazy.spawn("playerctl previous")),
+    Key([], "XF86AudioStop", lazy.spawn("playerctl stop")),
 
     # interact with prompts
-    Key(["mod1"], "F2",              lazy.spawn('dmenu_run -p "Run? >" -fn "Envy Code R-10" -sb "#DDDDDD" -sf "#000000" -nb "#000000"')),
+    Key([mod], "r",              lazy.spawn('dmenu_run -p "Run? >" -fn "Iosevka-10" -sb "#DDDDDD" -sf "#000000" -nb "#000000"')),
     Key([mod], "g",              lazy.switchgroup()),
 
     Key([mod, 'mod1'], "j",
@@ -489,11 +495,11 @@ keys = [
 
 
     # start specific apps
-    Key([mod], "w",              lazy.spawn("google-chrome")),
-    Key([mod, "shift"], "w",     lazy.spawn("firefox")),
-    Key([mod], "m",              lazy.spawn("evolution")),
-    Key([mod], "s",              lazy.spawn("slack")),
-    Key([mod], "Return",         lazy.spawn("terminator")),
+    Key([mod], "w",              lazy.spawn("firefox")),
+    Key([mod, "shift"], "w",     lazy.spawn("chromium")),
+    Key([mod], "m",              lazy.function(spawn_app_or_group("evolution"))),
+    Key([mod], "s",              lazy.function(spawn_app_or_group("slack"))),
+    Key([mod], "Return",         lazy.spawn("sakura")),
     Key([mod], "a",              lazy.function(spawn_app_or_group("spotify"))),
     Key([mod, "shift"], "a",     lazy.spawn("pavucontrol")),
     Key([mod], "v",              lazy.function(spawn_app_or_group('vlc'))),
@@ -507,9 +513,9 @@ keys = [
     Key([mod], "e",              lazy.function(spawn_app_or_group("emacs"))),
 
     # Special functions
-    Key([], "Print",             lazy.spawn("shutter -f")),  # Capture full screen
-    Key(["shift"], "Print",      lazy.spawn("shutter -s")),  # Capture selection
-    Key([], "Pause",             lazy.spawn("xscreensaver-command --lock")),
+    Key([], "Print",             lazy.spawn("gnome-screenshot")),  # Capture full screen
+    Key(["shift"], "Print",      lazy.spawn("gnome-screenshot -a")),  # Capture selection
+    Key([], "Pause",             lazy.spawn("xscreensaver-command -lock")),
 ]
 
 # This allows you to drag windows around with the mouse if you want.
@@ -526,7 +532,7 @@ mouse = [
 groups = [
     Group('main', position=1),
     Group('chat', persist=True, position=2,
-          matches=[Match(wm_class=['Pidgin', 'Cutegram', 'Discord', 'TeamSpeak 3', 'Telegram', 'Franz'])],),
+          matches=[Match(wm_class=['Pidgin', 'Slack', 'Discord', 'TeamSpeak 3', 'TelegramDesktop', 'Franz'])],),
     Group('mail', position=3, exclusive=False,
           matches=[Match(wm_class=['Nylas N1', 'Evolution'])],
           init=True, persist=True,),
@@ -534,23 +540,26 @@ groups = [
           matches=[Match(wm_class=['Terminator', 'Emacs'])],
           position=4),
     Group('work', position=5),
+    Group('aux', position=6),
     Group("media", persist=True, init=True,
-          matches=[Match(wm_class=["Vlc", "Banshee", "xbmc.bin", 'Amarok', 'Spotify'
-                                   'Clementine', 'nuvolaplayer'], wm_instance_class=['spotify'])]
+          matches=[Match(wm_class=["Vlc", "Banshee", "xbmc.bin", 'Amarok', 'spotify'
+                                   'Clementine', 'nuvolaplayer'])]
           ),
     Group('gaming', persist=True, init=False,
           matches=[Match(wm_class=['LoLPatcherUx.exe', 'LoLClient.exe', 'Wine', 'Steam'])],),
 
+    Group('reference', persist=False, init=False, matches=[Match(wm_class=['Zeal'])]),
 ]
 
 # dgroup rules that not belongs to any group
 dgroups_app_rules = [
     # Everything i want to be float, but don't want to change group
-    Rule(Match(title=['nested', 'gscreenshot'],
-               wm_class=['Plugin-container', 'Gnome-commander', 'Nautilus', 'Krusader',
-                         re.compile('Gnome-keyring-prompt.*?')],
-               ),
+    Rule(Match(title=['nested', 'gscreenshot'],),
          float=True, intrusive=True),
+    Rule(Match(wm_class=['Plugin-container', 'Gnome-commander', 'Nautilus', 'Krusader',
+                         re.compile('.*keyring.*')],),
+         float=True, intrusive=True),
+    Rule(Match(wm_type='dialog'), float=True, intrusive=True),
 
     # floating windows
     Rule(Match(wm_class=['Steam'],
@@ -559,8 +568,8 @@ dgroups_app_rules = [
                ),
          float=True, group='gaming'),
     Rule(Match(wm_class=['LoLPatcherUx.exe', 'LoLClient.exe']), float=True),
-    Rule(Match(wm_class=['Spotify'], wm_instance_class=['spotify'], title='Spotify'), group='media', intrusive=True),
-    ]
+    Rule(Match(wm_class=['Spotify']), group='media', intrusive=True),
+]
 
 # auto bind keys to dgroups mod+1 to 9
 dgroups_key_binder = simple_key_binder(mod)
@@ -569,7 +578,7 @@ layouts = [
     layout.Max(),  # Fullscreen all the things
     layout.Matrix(),  # Tile evenly in squares
     layout.MonadTall(),  # 1 tall pane, 2 small ones
-    layout.Floating(border_focus="#555555"),
+    floating_layout,
 ]
 
 
@@ -592,9 +601,16 @@ def app_by_conf(window):
 
 @hook.subscribe.startup
 def startup():
-    execute_once('compton --backend glx -b')
+    execute_once('compton')
+    execute_once('nitrogen --restore')
+    execute_once('setxkbmap -layout us_intl -option ctrl:swapcaps')
+    execute_once('autorandr --change')
+    execute_once('volumeicon')
+    execute_once('gnome-screensaver')
 
 
 @hook.subscribe.screen_change
 def restart_on_randr(qtile, ev):
     qtile.cmd_restart()
+    execute_once('setxkbmap -layout us_intl -option ctrl:swapcaps')
+    execute_once('nitrogen --restore')
