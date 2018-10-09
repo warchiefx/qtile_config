@@ -14,7 +14,7 @@ import subprocess
 RESOURCE_PATH = os.path.join(os.path.dirname(__file__), 'resources')
 
 widget_defaults = {
-    'font': "Iosevka",
+    'font': "Iosevka Term",
     'fontsize': 12,
     'background': '#000000',
     'foreground': '#BBBBBB'
@@ -29,6 +29,10 @@ sep_defaults = {
 
 APP_MAP = {
     ('emacs', 'Emacs'): {
+        'group': 'dev',
+        'cmd': 'emacs',
+    },
+    ('sakura', 'Sakura'): {
         'group': 'dev',
         'cmd': 'emacs',
     },
@@ -235,6 +239,153 @@ def modify_opacity(incr=0.1):
     return f
 
 
+TRIPLE_SCREEN_CONFIG = [
+    Screen(top=bar.Bar([widget.GroupBox(urgent_alert_method='text', font=widget_defaults['font'],
+                                        fontsize=widget_defaults['fontsize'],
+                                        # margin_y = 1,
+                                        # margin_x = 1,
+                                        borderwidth=1,
+                                        padding=1,
+                                        this_current_screen_border="#A6E22A", background=widget_defaults['background'],
+                                        urgent_border="#BB1100",),
+                        widget.Sep(**sep_defaults),
+                        # widget.WindowTabs(),
+                        # Current window name.
+                        widget.WindowName(font="Iosevka", fontsize=12),
+                        #widget.Sep(**sep_defaults),
+                        # widget.Notify(foreground="#D7aa00", font=widget_defaults['font'], fontsize=widget_defaults['fontsize'],
+                        #               background=widget_defaults['background']),
+                        # widget.BatteryIcon(theme_path=os.path.join(RESOURCE_PATH, 'battery-icons')),
+                        widget.Battery(
+                            battery_name='BAT0',
+                            # energy_now_file='charge_now',
+                            # energy_full_file='charge_full',
+                            # power_now_file='current_now',
+                            foreground="#A1A1A1",
+                            charge_char='↑',
+                            discharge_char='↓',
+                            padding=4,
+                            font=widget_defaults['font'], fontsize=widget_defaults['fontsize'], background=widget_defaults['background'],
+                            format='Batt: {char} {percent:2.0%} ({hour:d}:{min:02d})',
+                            update_interval=5,
+                        ),
+                        widget.Sep(**sep_defaults),
+                        widget.Systray(background=widget_defaults['background']),
+                        widget.Sep(**sep_defaults),
+                        widget.Clock(format='%a %d %b', **widget_defaults),
+                        widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
+                                     fontsize=widget_defaults['fontsize'],
+                                     background=widget_defaults['background']),
+    ], 20, background=widget_defaults['background'], opacity=0.94),
+           bottom=bar.Bar([
+               HostInfo(separator_color='#777777', **widget_defaults),
+               widget.Sep(**sep_defaults),
+               # widget.CPUGraph(width=80, line_width=2, border_color='#111111',
+               #                 graph_color='#DDDDDD', fill_color='#D7DD00'),
+               # widget.MemoryGraph(width=80, line_width=2, border_color='#111111',
+               #                    graph_color='#DDDDDD', fill_color='#D7DD00'),
+               Metrics(cpu_label_foreground="#DDDDDD", download_foreground="#DDDDDD",
+                       mem_label_foreground="#DDDDDD", upload_foreground="#AAAAAA",
+                       net_label_foreground="#DDDDDD",
+                       **widget_defaults),
+               widget.Sep(**sep_defaults),
+               widget.ThermalSensor(tag_sensor="temp1", threshold=86,
+                                    markup=True, show_tag=True, **widget_defaults),
+               widget.Sep(**sep_defaults),
+               widget.Net(interface="wlan0", markup=True, **widget_defaults),
+               widget.Spacer(width=bar.STRETCH),
+               TaskWarriorWidget(label_color="#DDDDDD", **widget_defaults),
+           ], 20, background=widget_defaults['background'], opacity=0.94)),
+    Screen(
+        top=bar.Bar([
+            # This is a list of our virtual desktops.
+            widget.GroupBox(urgent_alert_method='text', font=widget_defaults['font'],
+                            fontsize=widget_defaults['fontsize'],
+                            # margin_y = 1,
+                            # margin_x = 1,
+                            borderwidth=1,
+                            padding=1,
+                            this_current_screen_border="#A6E22A", background=widget_defaults['background'],
+                            urgent_border="#BB1100",),
+            widget.Sep(**sep_defaults),
+
+            # A prompt for spawning processes or switching groups. This will be
+            # invisible most of the time.
+            widget.Prompt(foreground="#6A75FF", font=widget_defaults['font'], fontsize=widget_defaults['fontsize'],
+                          background=widget_defaults['background']),
+
+            # Current window name.
+            widget.WindowName(font="Fira", fontsize=12),
+
+            widget.Clock(format='%a %d %b', **widget_defaults),
+            widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
+                         fontsize=widget_defaults['fontsize'],
+                         background=widget_defaults['background']),
+        ], 20, background=widget_defaults['background'], opacity=0.94),
+        bottom=bar.Bar([HostInfo(separator_color='#777777', **widget_defaults),
+                        widget.Sep(**sep_defaults),
+                        # widget.CPUGraph(width=80, line_width=2, border_color='#111111',
+                        #                 graph_color='#DDDDDD', fill_color='#D7DD00'),
+                        # widget.MemoryGraph(width=80, line_width=2, border_color='#111111',
+                        #                    graph_color='#DDDDDD', fill_color='#D7DD00'),
+                        Metrics(cpu_label_foreground="#DDDDDD", download_foreground="#DDDDDD",
+                                mem_label_foreground="#DDDDDD", upload_foreground="#AAAAAA",
+                                net_label_foreground="#DDDDDD",
+                                **widget_defaults),
+                        widget.Spacer(width=bar.STRETCH),
+                        TaskWarriorWidget(label_color="#DDDDDD", **widget_defaults),
+                        # WCXGcalWidget(www_group='personal', storage_file='/home/warchiefx/.config/qtile/gcal.settings',
+                        #              update_interval=900, calendar='primary',
+                        #             reminder_color="#D7aa00",
+                        #             **widget_defaults),
+                        #AmarokWidget(**widget_defaults),
+                        ], 20, background=widget_defaults['background'], opacity=0.94)),
+    Screen(
+        top=bar.Bar([
+            # This is a list of our virtual desktops.
+            widget.GroupBox(urgent_alert_method='text', font=widget_defaults['font'],
+                            fontsize=widget_defaults['fontsize'],
+                            # margin_y = 1,
+                            # margin_x = 1,
+                            borderwidth=1,
+                            padding=1,
+                            this_current_screen_border="#A6E22A", background=widget_defaults['background'],
+                            urgent_border="#BB1100",),
+            widget.Sep(**sep_defaults),
+
+            # A prompt for spawning processes or switching groups. This will be
+            # invisible most of the time.
+            widget.Prompt(foreground="#6A75FF", font=widget_defaults['font'], fontsize=widget_defaults['fontsize'],
+                          background=widget_defaults['background']),
+
+            # Current window name.
+            widget.WindowName(font="Fira", fontsize=12),
+
+            widget.Clock(format='%a %d %b', **widget_defaults),
+            widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
+                         fontsize=widget_defaults['fontsize'],
+                         background=widget_defaults['background']),
+        ], 20, background=widget_defaults['background'], opacity=0.94),
+        bottom=bar.Bar([HostInfo(separator_color='#777777', **widget_defaults),
+                        widget.Sep(**sep_defaults),
+                        # widget.CPUGraph(width=80, line_width=2, border_color='#111111',
+                        #                 graph_color='#DDDDDD', fill_color='#D7DD00'),
+                        # widget.MemoryGraph(width=80, line_width=2, border_color='#111111',
+                        #                    graph_color='#DDDDDD', fill_color='#D7DD00'),
+                        Metrics(cpu_label_foreground="#DDDDDD", download_foreground="#DDDDDD",
+                                mem_label_foreground="#DDDDDD", upload_foreground="#AAAAAA",
+                                net_label_foreground="#DDDDDD",
+                                **widget_defaults),
+                        widget.Spacer(width=bar.STRETCH),
+                        TaskWarriorWidget(label_color="#DDDDDD", **widget_defaults),
+                        # WCXGcalWidget(www_group='personal', storage_file='/home/warchiefx/.config/qtile/gcal.settings',
+                        #              update_interval=900, calendar='primary',
+                        #             reminder_color="#D7aa00",
+                        #             **widget_defaults),
+                        #AmarokWidget(**widget_defaults),
+                        ], 20, background=widget_defaults['background'], opacity=0.94)),
+]
+
 DUAL_SCREEN_CONFIG = [
     Screen(
         top=bar.Bar([
@@ -258,7 +409,7 @@ DUAL_SCREEN_CONFIG = [
             widget.WindowName(font="Fira", fontsize=12),
 
             widget.Clock(format='%a %d %b', **widget_defaults),
-            widget.Clock(format='%H:%M', foreground="#DDDDDD", font=widget_defaults['font'],
+            widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
                          fontsize=widget_defaults['fontsize'],
                          background=widget_defaults['background']),
         ], 20, background=widget_defaults['background'], opacity=0.94),
@@ -273,7 +424,7 @@ DUAL_SCREEN_CONFIG = [
                                 net_label_foreground="#DDDDDD",
                                 **widget_defaults),
                         widget.Spacer(width=bar.STRETCH),
-                        EmacsTask(label_color="#DDDDDD", **widget_defaults),
+                        TaskWarriorWidget(label_color="#DDDDDD", **widget_defaults),
                         # WCXGcalWidget(www_group='personal', storage_file='/home/warchiefx/.config/qtile/gcal.settings',
                         #              update_interval=900, calendar='primary',
                         #             reminder_color="#D7aa00",
@@ -313,7 +464,7 @@ DUAL_SCREEN_CONFIG = [
                         widget.Systray(background=widget_defaults['background']),
                         widget.Sep(**sep_defaults),
                         widget.Clock(format='%a %d %b', **widget_defaults),
-                        widget.Clock(format='%H:%M', foreground="#DDDDDD", font=widget_defaults['font'],
+                        widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
                                      fontsize=widget_defaults['fontsize'],
                                      background=widget_defaults['background']),
     ], 20, background=widget_defaults['background'], opacity=0.94),
@@ -334,7 +485,7 @@ DUAL_SCREEN_CONFIG = [
                widget.Sep(**sep_defaults),
                widget.Net(interface="wlan0", markup=True, **widget_defaults),
                widget.Spacer(width=bar.STRETCH),
-               EmacsTask(label_color="#DDDDDD", **widget_defaults),
+               TaskWarriorWidget(label_color="#DDDDDD", **widget_defaults),
            ], 20, background=widget_defaults['background'], opacity=0.94))
 ]
 
@@ -388,7 +539,7 @@ SINGLE_SCREEN_CONFIG = [
             widget.Systray(background=widget_defaults['background']),
             widget.Sep(**sep_defaults),
             widget.Clock(format='%a %d %b', **widget_defaults),
-            widget.Clock(format='%H:%M', foreground="#DDDDDD", font=widget_defaults['font'],
+            widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
                          fontsize=widget_defaults['fontsize'],
                          background=widget_defaults['background']),
         ], 20, background=widget_defaults['background'], opacity=0.94),
@@ -409,7 +560,7 @@ SINGLE_SCREEN_CONFIG = [
                         widget.Sep(**sep_defaults),
                         widget.Net(interface="wlan0", markup=True, **widget_defaults),
                         widget.Spacer(width=bar.STRETCH),
-                        EmacsTask(label_color="#DDDDDD", **widget_defaults),
+                        TaskWarriorWidget(label_color="#DDDDDD", **widget_defaults),
                         # WCXGcalWidget(www_group='personal', storage_file='/home/warchiefx/.config/qtile/gcal.settings',
                         #              update_interval=900, calendar='primary',
                         #             reminder_color="#D7aa00",
@@ -422,6 +573,7 @@ SINGLE_SCREEN_CONFIG = [
 SCREEN_CONFIGS = {
     1: SINGLE_SCREEN_CONFIG,
     2: DUAL_SCREEN_CONFIG,
+    3: TRIPLE_SCREEN_CONFIG,
 }
 
 
@@ -509,7 +661,7 @@ keys = [
     Key([mod], "p",              lazy.function(spawn_app_or_group("telegram-desktop"))),
     Key([mod], "b",              lazy.function(spawn_app_or_group("transmission-gtk"))),
     Key([mod], "t",              lazy.function(spawn_app_or_group("hotot-gtk3"))),
-    Key([mod], "f",              lazy.spawn("gnome-commander")),
+    Key([mod], "f",              lazy.spawn("nautilus")),
     Key([mod], "e",              lazy.function(spawn_app_or_group("emacs"))),
 
     # Special functions
@@ -538,7 +690,7 @@ groups = [
           matches=[Match(wm_class=['Nylas N1', 'Evolution'])],
           init=True, persist=True,),
     Group('dev', exclusive=False,
-          matches=[Match(wm_class=['Terminator', 'Emacs'])],
+          matches=[Match(wm_class=['Terminator', 'Emacs', 'Sakura'])],
           position=4),
     Group('work', position=5),
     Group('aux', position=6),
