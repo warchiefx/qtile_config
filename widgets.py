@@ -479,9 +479,11 @@ class Metrics(ThreadedPollText):
             except:
                 pass
             if idle:
-                interfaces.append(
-                    '<span weight="bold" color="%s">%s:</span> %-11s' % (self.net_label_foreground, iface, ("%ds idle" % self.idle_ifaces[iface]))
-                )
+                text = '<span weight="bold" color="{net_label_foreground}">{iface}:</span>' + \
+                    ' <span color="{download_foreground}">{rx}</span> / <span color="{upload_foreground}">{tx}</span>'
+                text = text.format(net_label_foreground=self.net_label_foreground, iface=iface, rx=humanize_bytes(0), tx=humanize_bytes(0),
+                                   upload_foreground=self.upload_foreground, download_foreground=self.download_foreground)
+                interfaces.append(text)
                 self.idle_ifaces[iface] += 1
                 if self.idle_ifaces[iface] > 30:
                     del self.idle_ifaces[iface]
