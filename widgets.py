@@ -493,9 +493,9 @@ class Metrics(ThreadedPollText):
         # sensors_output = self.read_sensors()
         stat = [self.get_cpu_usage(),  # self.format_cpu_temp(sensors_output), self.format_fan_speed(sensors_output),
                 self.get_mem_usage(), self.get_load_avg()]
-        # net = self.get_net_usage()
-        # if net:
-        #     stat.append(net)
+        net = self.get_net_usage()
+        if net:
+            stat.append(net)
         text = ('<span color="%s"> | </span>' % (self.separator_color)).join(stat)
 
         return text
