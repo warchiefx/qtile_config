@@ -527,7 +527,7 @@ class HostInfo(ThreadedPollText):
 
     def poll(self):
         (os, node, kernel_ver, compile_date, arch, misc) = platform.uname()
-        text = '<span weight="bold">{node}</span><span color="{separator_color}"> // </span><span>{kernel_ver}</span>'.format(node=node, separator_color=self.separator_color, kernel_ver=kernel_ver)
+        text = f'<span weight="bold">{node}</span>'
         return text
 
 
