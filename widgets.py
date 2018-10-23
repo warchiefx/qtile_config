@@ -452,6 +452,7 @@ class Metrics(ThreadedPollText):
         basedir = '/sys/class/net'
         for iface in os.listdir(basedir):
             if iface == "lo": continue
+            if iface.startswith(tuple(['veth', 'docker', 'br'])): continue
             j = os.path.join
             ifacedir = j(basedir, iface)
             statdir = j(ifacedir, 'statistics')
