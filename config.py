@@ -296,50 +296,52 @@ PRIMARY_SCREEN_CONFIG = Screen(top=bar.Bar([widget.GroupBox(urgent_alert_method=
                                    TaskWarriorWidget(label_color="#DDDDDD", **widget_defaults),
                                ], 20, background=widget_defaults['background'], opacity=0.94))
 
-SECONDARY_SCREEN_CONFIG = Screen(
-    top=bar.Bar([
-        # This is a list of our virtual desktops.
-        widget.GroupBox(urgent_alert_method='text', font=widget_defaults['font'],
-                        fontsize=widget_defaults['fontsize'],
-                        # margin_y = 1,
-                        # margin_x = 1,
-                        borderwidth=1,
-                        padding=1,
-                        this_current_screen_border="#A6E22A", background=widget_defaults['background'],
-                        urgent_border="#BB1100",),
-        widget.Sep(**sep_defaults),
 
-        # A prompt for spawning processes or switching groups. This will be
-        # invisible most of the time.
-        widget.Prompt(foreground="#6A75FF", font=widget_defaults['font'], fontsize=widget_defaults['fontsize'],
-                      background=widget_defaults['background']),
+def make_secondary_screen_config():
+    return Screen(
+        top=bar.Bar([
+            # This is a list of our virtual desktops.
+            widget.GroupBox(urgent_alert_method='text', font=widget_defaults['font'],
+                            fontsize=widget_defaults['fontsize'],
+                            # margin_y = 1,
+                            # margin_x = 1,
+                            borderwidth=1,
+                            padding=1,
+                            this_current_screen_border="#A6E22A", background=widget_defaults['background'],
+                            urgent_border="#BB1100",),
+            widget.Sep(**sep_defaults),
 
-        # Current window name.
-        widget.WindowName(font="Fira", fontsize=12),
+            # A prompt for spawning processes or switching groups. This will be
+            # invisible most of the time.
+            widget.Prompt(foreground="#6A75FF", font=widget_defaults['font'], fontsize=widget_defaults['fontsize'],
+                          background=widget_defaults['background']),
 
-        widget.Clock(format='%a %d %b', **widget_defaults),
-        widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
-                     fontsize=widget_defaults['fontsize'],
-                     background=widget_defaults['background']),
-    ], 20, background=widget_defaults['background'], opacity=0.94),
-    bottom=bar.Bar([HostInfo(separator_color='#777777', **widget_defaults),
-                    widget.Sep(**sep_defaults),
-                    # widget.CPUGraph(width=80, line_width=2, border_color='#111111',
-                    #                 graph_color='#DDDDDD', fill_color='#D7DD00'),
-                    # widget.MemoryGraph(width=80, line_width=2, border_color='#111111',
-                    #                    graph_color='#DDDDDD', fill_color='#D7DD00'),
-                    Metrics(cpu_label_foreground="#DDDDDD", download_foreground="#DDDDDD",
-                            mem_label_foreground="#DDDDDD", upload_foreground="#AAAAAA",
-                            net_label_foreground="#DDDDDD",
-                            **widget_defaults),
-                    widget.Spacer(width=bar.STRETCH),
-                    TaskWarriorWidget(label_color="#DDDDDD", **widget_defaults),
-                    # WCXGcalWidget(www_group='personal', storage_file='/home/warchiefx/.config/qtile/gcal.settings',
-                    #              update_interval=900, calendar='primary',
-                    #             reminder_color="#D7aa00",
-                    #             **widget_defaults),
-                    #AmarokWidget(**widget_defaults),
-    ], 20, background=widget_defaults['background'], opacity=0.94))
+            # Current window name.
+            widget.WindowName(font="Fira", fontsize=12),
+
+            widget.Clock(format='%a %d %b', **widget_defaults),
+            widget.Clock(format='%I:%M', foreground="#DDDDDD", font=widget_defaults['font'],
+                         fontsize=widget_defaults['fontsize'],
+                         background=widget_defaults['background']),
+        ], 20, background=widget_defaults['background'], opacity=0.94),
+        bottom=bar.Bar([HostInfo(separator_color='#777777', **widget_defaults),
+                        widget.Sep(**sep_defaults),
+                        # widget.CPUGraph(width=80, line_width=2, border_color='#111111',
+                        #                 graph_color='#DDDDDD', fill_color='#D7DD00'),
+                        # widget.MemoryGraph(width=80, line_width=2, border_color='#111111',
+                        #                    graph_color='#DDDDDD', fill_color='#D7DD00'),
+                        Metrics(cpu_label_foreground="#DDDDDD", download_foreground="#DDDDDD",
+                                mem_label_foreground="#DDDDDD", upload_foreground="#AAAAAA",
+                                net_label_foreground="#DDDDDD",
+                                **widget_defaults),
+                        widget.Spacer(width=bar.STRETCH),
+                        TaskWarriorWidget(label_color="#DDDDDD", **widget_defaults),
+                        # WCXGcalWidget(www_group='personal', storage_file='/home/warchiefx/.config/qtile/gcal.settings',
+                        #              update_interval=900, calendar='primary',
+                        #             reminder_color="#D7aa00",
+                        #             **widget_defaults),
+                        #AmarokWidget(**widget_defaults),
+        ], 20, background=widget_defaults['background'], opacity=0.94))
 
 
 def get_number_of_screens():
@@ -353,10 +355,11 @@ def get_number_of_screens():
 def make_screen_config(screens):
     # TODO: Allow arbitrarily specifying which screen is primary
     screen_config = [PRIMARY_SCREEN_CONFIG]
-    for i in range(1, screens):
-        screen_config.append(SECONDARY_SCREEN_CONFIG)
+    for i in range(screens - 1):
+        screen_config.append(make_secondary_screen_config())
 
     return screen_config
+
 
 num_screens = get_number_of_screens()
 
