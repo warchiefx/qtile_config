@@ -446,6 +446,7 @@ keys = [
     Key(["shift"], "Print",      lazy.spawn("gnome-screenshot -i")),  # Capture interactively
     Key(["mod1"], "Print",       lazy.spawn("gnome-screenshot -w")),  # Capture window
     Key([], "Pause",             lazy.spawn("gnome-screensaver-command --lock")),
+    Key([mod, "mod1"], "l",      lazy.spawn("gnome-screensaver-command --lock")),
 ]
 
 # This allows you to drag windows around with the mouse if you want.
