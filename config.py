@@ -14,10 +14,10 @@ import subprocess
 RESOURCE_PATH = os.path.join(os.path.dirname(__file__), "resources")
 
 widget_defaults = {
-    "font": "Iosevka Term",
+    "font": "Iosevka",
     "fontsize": 12,
     "background": "#0a0f14",
-    "foreground": "#98d1ce",
+    "foreground": "#BBBBBB",
 }
 
 sep_defaults = {"size_percent": 60, "foreground": "#777777", "padding": 5}
@@ -276,7 +276,6 @@ def make_secondary_screen_config():
                     background=widget_defaults["background"],
                     urgent_border="#BB1100",
                 ),
-                widget.Sep(**sep_defaults),
                 # A prompt for spawning processes or switching groups. This will be
                 # invisible most of the time.
                 widget.Prompt(
@@ -286,19 +285,6 @@ def make_secondary_screen_config():
                     background=widget_defaults["background"],
                 ),
                 widget.Spacer(width=bar.STRETCH),
-                # widget.CPUGraph(width=80, line_width=2, border_color='#111111',
-                #                 graph_color='#26a98b', fill_color='#D7DD00'),
-                # widget.MemoryGraph(width=80, line_width=2, border_color='#111111',
-                #                    graph_color='#26a98b', fill_color='#D7DD00'),
-                Metrics(
-                    cpu_label_foreground="#26a98b",
-                    download_foreground="#26a98b",
-                    mem_label_foreground="#26a98b",
-                    upload_foreground="#98d1ce",
-                    net_label_foreground="#26a98b",
-                    **widget_defaults
-                ),
-                widget.Sep(**sep_defaults),
                 widget.Clock(format="%a %d %b", **widget_defaults),
                 widget.Clock(
                     format="%I:%M",
