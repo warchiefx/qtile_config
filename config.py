@@ -100,6 +100,12 @@ APP_MAP = {
         "group": "misc",
         "cmd": "transmission-gtk",
     },
+    ("sun-awt-X11-XWindowPeer", "jetbrains-pycharm"): {
+        "group": None,
+        "extra_args": {
+            "floating": True
+        }
+    }
 }
 
 
