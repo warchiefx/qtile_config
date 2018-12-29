@@ -17,8 +17,10 @@ widget_defaults = {
     "font": "Iosevka",
     "fontsize": 12,
     "background": "#0a0f14",
-    "foreground": "#BBBBBB",
+    "foreground": "#ffffff",
 }
+
+LABEL_COLOR = "#bd2c40"
 
 sep_defaults = {"size_percent": 60, "foreground": "#777777", "padding": 5}
 
@@ -180,9 +182,10 @@ PRIMARY_SCREEN_CONFIG = Screen(
                 # margin_x = 1,
                 borderwidth=1,
                 padding=1,
-                this_current_screen_border="#A6E22A",
+                this_current_screen_border="#26a98b",
                 background=widget_defaults["background"],
                 urgent_border="#BB1100",
+                highlight_method="border"
             ),
             widget.Spacer(width=bar.STRETCH),
             # widget.CPUGraph(width=80, line_width=2, border_color='#111111',
@@ -190,11 +193,11 @@ PRIMARY_SCREEN_CONFIG = Screen(
             # widget.MemoryGraph(width=80, line_width=2, border_color='#111111',
             #                    graph_color='#26a98b', fill_color='#D7DD00'),
             Metrics(
-                cpu_label_foreground="#26a98b",
-                download_foreground="#26a98b",
-                mem_label_foreground="#26a98b",
-                upload_foreground="#98d1ce",
-                net_label_foreground="#26a98b",
+                cpu_label_foreground=LABEL_COLOR,
+                download_foreground=LABEL_COLOR,
+                mem_label_foreground=LABEL_COLOR,
+                upload_foreground="#cccccc",
+                net_label_foreground=LABEL_COLOR,
                 **widget_defaults
             ),
             widget.Sep(**sep_defaults),
@@ -203,7 +206,7 @@ PRIMARY_SCREEN_CONFIG = Screen(
                 # energy_now_file='charge_now',
                 # energy_full_file='charge_full',
                 # power_now_file='current_now',
-                foreground="#98d1ce",
+                foreground="#cccccc",
                 charge_char="↑",
                 discharge_char="↓",
                 padding=4,
@@ -219,7 +222,7 @@ PRIMARY_SCREEN_CONFIG = Screen(
             widget.Clock(format="%a %d %b", **widget_defaults),
             widget.Clock(
                 format="%I:%M",
-                foreground="#26a98b",
+                foreground=LABEL_COLOR,
                 font=widget_defaults["font"],
                 fontsize=widget_defaults["fontsize"],
                 background=widget_defaults["background"],
@@ -238,11 +241,11 @@ PRIMARY_SCREEN_CONFIG = Screen(
     #         # widget.MemoryGraph(width=80, line_width=2, border_color='#111111',
     #         #                    graph_color='#26a98b', fill_color='#D7DD00'),
     #         Metrics(
-    #             cpu_label_foreground="#26a98b",
-    #             download_foreground="#26a98b",
-    #             mem_label_foreground="#26a98b",
+    #             cpu_label_foreground=LABEL_COLOR,
+    #             download_foreground=LABEL_COLOR,
+    #             mem_label_foreground=LABEL_COLOR,
     #             upload_foreground="#AAAAAA",
-    #             net_label_foreground="#26a98b",
+    #             net_label_foreground=LABEL_COLOR,
     #             **widget_defaults
     #         ),
     #         widget.Sep(**sep_defaults),
@@ -256,7 +259,7 @@ PRIMARY_SCREEN_CONFIG = Screen(
     #         widget.Sep(**sep_defaults),
     #         widget.Net(interface="wlan0", markup=True, **widget_defaults),
     #         widget.Spacer(width=bar.STRETCH),
-    #         TaskWarriorWidget(label_color="#26a98b", **widget_defaults),
+    #         TaskWarriorWidget(label_color=LABEL_COLOR, **widget_defaults),
     #     ],
     #     20,
     #     background=widget_defaults["background"],
@@ -278,7 +281,7 @@ def make_secondary_screen_config():
                     # margin_x = 1,
                     borderwidth=1,
                     padding=1,
-                    this_current_screen_border="#A6E22A",
+                    this_current_screen_border="#26a98b",
                     background=widget_defaults["background"],
                     urgent_border="#BB1100",
                 ),
@@ -294,7 +297,7 @@ def make_secondary_screen_config():
                 widget.Clock(format="%a %d %b", **widget_defaults),
                 widget.Clock(
                     format="%I:%M",
-                    foreground="#26a98b",
+                    foreground=LABEL_COLOR,
                     font=widget_defaults["font"],
                     fontsize=widget_defaults["fontsize"],
                     background=widget_defaults["background"],
@@ -313,15 +316,15 @@ def make_secondary_screen_config():
         #         # widget.MemoryGraph(width=80, line_width=2, border_color='#111111',
         #         #                    graph_color='#26a98b', fill_color='#D7DD00'),
         #         Metrics(
-        #             cpu_label_foreground="#26a98b",
-        #             download_foreground="#26a98b",
-        #             mem_label_foreground="#26a98b",
+        #             cpu_label_foreground=LABEL_COLOR,
+        #             download_foreground=LABEL_COLOR,
+        #             mem_label_foreground=LABEL_COLOR,
         #             upload_foreground="#AAAAAA",
-        #             net_label_foreground="#26a98b",
+        #             net_label_foreground=LABEL_COLOR,
         #             **widget_defaults
         #         ),
         #         widget.Spacer(width=bar.STRETCH),
-        #         TaskWarriorWidget(label_color="#26a98b", **widget_defaults),
+        #         TaskWarriorWidget(label_color=LABEL_COLOR, **widget_defaults),
         #         # WCXGcalWidget(www_group='personal', storage_file='/home/warchiefx/.config/qtile/gcal.settings',
         #         #              update_interval=900, calendar='primary',
         #         #             reminder_color="#D7aa00",
