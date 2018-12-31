@@ -14,10 +14,15 @@ import subprocess
 RESOURCE_PATH = os.path.join(os.path.dirname(__file__), "resources")
 
 widget_defaults = {
-    "font": "Iosevka",
+    "font": "Pragmata Pro",
     "fontsize": 12,
     "background": "#0a0f14",
     "foreground": "#ffffff",
+}
+
+layout_defaults = {
+    "border_focus": "#555555",
+    "border_normal": "#0a0f14"
 }
 
 LABEL_COLOR = "#bd2c40"
@@ -112,7 +117,7 @@ APP_MAP = {
 
 
 floating_layout = layout.floating.Floating(
-    border_focus="#555555", border_normal="#0a0f14"
+    **layout_defaults
 )
 
 
@@ -230,7 +235,7 @@ PRIMARY_SCREEN_CONFIG = Screen(
         ],
         20,
         background=widget_defaults["background"],
-        opacity=0.94,
+        opacity=1,
     ),
     # bottom=bar.Bar(
     #     [
@@ -305,7 +310,7 @@ def make_secondary_screen_config():
             ],
             20,
             background=widget_defaults["background"],
-            opacity=0.94,
+            opacity=1,
         ),
         # bottom=bar.Bar(
         #     [
@@ -566,9 +571,9 @@ dgroups_app_rules = [
 dgroups_key_binder = simple_key_binder(mod)
 
 layouts = [
-    layout.Max(),  # Fullscreen all the things
-    layout.Matrix(),  # Tile evenly in squares
-    layout.MonadTall(),  # 1 tall pane, 2 small ones
+    layout.Max(**layout_defaults),  # Fullscreen all the things
+    layout.Matrix(**layout_defaults),  # Tile evenly in squares
+    layout.MonadTall(**layout_defaults),  # 1 tall pane, 2 small ones
     floating_layout,
 ]
 
