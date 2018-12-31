@@ -413,7 +413,7 @@ keys = [
         [mod],
         "r",
         lazy.spawn(
-            'dmenu_run -p "Run? >" -fn "Iosevka-10" -sb "#26a98b" -sf "#0a0f14" -nb "#0a0f14"'
+            'dmenu_run -p "Run? >" -fn "Iosevka-10" -sb "#dddddd" -sf "#0a0f14" -nb "#0a0f14"'
         ),
     ),
     Key([mod], "g", lazy.switchgroup()),
